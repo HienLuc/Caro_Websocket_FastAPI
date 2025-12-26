@@ -1,0 +1,70 @@
+# Đồ Án Lập Trình Mạng: Game Caro Online (WebSockets)
+
+Dự án xây dựng trò chơi Caro (Gomoku) thời gian thực, sử dụng kiến trúc **Client-Server** với giao thức **WebSockets** để đảm bảo tốc độ phản hồi tức thì.
+
+---
+
+## Thành Viên & Phân Chia Trách Nhiệm
+
+Mô hình team: **1 Network - 2 Backend Logic - 2 Frontend**
+
+| STT | Thành Viên | MSSV | Role (Vai Trò) | Nhiệm vụ chi tiết | File phụ trách |
+|:---:|:---|:---:|:---|:---|:---|
+| 1 | Lục Sỹ Minh Hiền | ... | **Socket Core** | Quản lý kết nối mạng, Connection Manager, điều phối luồng tin nhắn giữa 2 người chơi. | `main.py`, `connection_manager.py` |
+| 2 | [Tên Bạn BE 1] | ... | **Game Logic** | Thuật toán check thắng/thua (5 ô), validate nước đi hợp lệ. | `game_logic.py` |
+| 3 | [Tên Bạn BE 2] | ... | **System & Data**| API Đăng ký/Đăng nhập, Quản lý file dữ liệu, lưu lịch sử đấu. | `api.py`, `database.py`, `models.py`, `data.json` |
+| 4 | [Tên Bạn FE 1] | ... | **FE Integration**| Xử lý sự kiện JS, kết nối Socket Client, nhận lệnh từ Server để vẽ. | `socket_client.js`, `main.js` |
+| 5 | [Tên Bạn FE 2] | ... | **UI/UX Design** | Thiết kế giao diện HTML/CSS, hiệu ứng bàn cờ, responsive. | `index.html`, `game.html`, `style.css` |
+
+---
+
+## Công Nghệ Sử Dụng
+
+* **Backend:** Python 3.10+, FastAPI (Framework), Uvicorn (ASGI Server).
+* **Communication:** WebSocket Protocol.
+* **Database:** JSON File Storage (NoSQL simulation).
+* **Frontend:** HTML5, CSS3, Vanilla JavaScript.
+
+---
+
+## Hướng Dẫn Cài Đặt & Chạy (Localhost)
+
+### Bước 1: Chuẩn bị môi trường (Backend)
+Yêu cầu máy đã cài Python.
+
+1. Di chuyển vào thư mục dự án:
+   ```bash
+   cd caro-socket-project
+
+2. Cài đặt các thư viện cần thiết:
+    pip install -r requirements.txt
+
+3. Khởi chạy Server:
+    uvicorn backend.main:app --reload
+
+### Bước 2: Chạy Client (Frontend)
+
+Cách đơn giản: Vào thư mục frontend, click đúp chuột vào file index.html.
+Cách chuẩn (khuyên dùng): Cài Extension "Live Server" trên VS Code -> Chuột phải vào index.html -> Chọn Open with Live Server.
+
+### Cấu trúc thư mục
+
+Caro-Websocket-FastAPI/
+│
+├── backend/                # KHỐI SERVER
+│   ├── main.py             # [Socket] Entry point, định nghĩa WebSocket Endpoint
+│   ├── connection_manager.py # [Socket] Quản lý danh sách người chơi online
+│   ├── game_logic.py       # [Logic] Class Game, thuật toán tìm người thắng
+│   ├── api.py              # [System] Các API HTTP (REST) cho Login/Register
+│   ├── database.py         # [System] Hàm đọc/ghi file data.json
+│   ├── models.py           # [System] Pydantic models (User, Room)
+│   └── data.json           # [System] Nơi lưu dữ liệu
+│
+├── frontend/               # KHỐI CLIENT
+│   ├── index.html          # [UI] Màn hình đăng nhập
+│   ├── game.html           # [UI] Màn hình chơi game
+│   ├── style.css           # [UI] Trang trí giao diện
+│   ├── main.js             # [Integration] Logic sự kiện click, xử lý DOM
+│   └── socket_client.js    # [Integration] Code kết nối với Server
+│
+└── README.md
