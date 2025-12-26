@@ -47,8 +47,9 @@ Yêu cầu máy đã cài Python.
 Cách đơn giản: Vào thư mục frontend, click đúp chuột vào file index.html.
 Cách chuẩn (khuyên dùng): Cài Extension "Live Server" trên VS Code -> Chuột phải vào index.html -> Chọn Open with Live Server.
 
-### Cấu trúc thư mục
+## Cấu Trúc Thư Mục
 
+```text
 Caro-Websocket-FastAPI/
 │
 ├── backend/                # KHỐI SERVER
@@ -67,4 +68,5 @@ Caro-Websocket-FastAPI/
 │   ├── main.js             # [Integration] Logic sự kiện click, xử lý DOM
 │   └── socket_client.js    # [Integration] Code kết nối với Server
 │
-└── README.md
+├── requirements.txt        # Các thư viện cần cài đặt
+└── README.md               # Hướng dẫn chạy dự án
