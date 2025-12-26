@@ -1,4 +1,4 @@
-# Đồ Án Lập Trình Mạng: Game Caro Online (WebSockets)
+TênnĐồ Án Lập Trình Mạng: Game Caro Online (WebSockets)
 
 Dự án xây dựng trò chơi Caro (Gomoku) thời gian thực, sử dụng kiến trúc **Client-Server** với giao thức **WebSockets** để đảm bảo tốc độ phản hồi tức thì.
 
@@ -14,7 +14,7 @@ Mô hình team: **1 Network - 2 Backend Logic - 2 Frontend**
 | 2 | [Tên Bạn BE 1] | ... | **Game Logic** | Thuật toán check thắng/thua (5 ô), validate nước đi hợp lệ. | `game_logic.py` |
 | 3 | [Tên Bạn BE 2] | ... | **System & Data**| API Đăng ký/Đăng nhập, Quản lý file dữ liệu, lưu lịch sử đấu. | `api.py`, `database.py`, `models.py`, `data.json` |
 | 4 | [Tên Bạn FE 1] | ... | **FE Integration**| Xử lý sự kiện JS, kết nối Socket Client, nhận lệnh từ Server để vẽ. | `socket_client.js`, `main.js` |
-| 5 | [Tên Bạn FE 2] | ... | **UI/UX Design** | Thiết kế giao diện HTML/CSS, hiệu ứng bàn cờ, responsive. | `index.html`, `game.html`, `style.css` |
+| 5 |Lê Hoàng Nhật Bình] | ... | **UI/UX Design** | Thiết kế giao diện HTML/CSS, hiệu ứng bàn cờ, responsive. | `index.html`, `game.html`, `style.css` |
 
 ---
 
