@@ -13,7 +13,7 @@ Mô hình team: **1 Network - 2 Backend Logic - 2 Frontend**
 | 1 | Lục Sỹ Minh Hiền | ... | **Socket Core** | Quản lý kết nối mạng, Connection Manager, điều phối luồng tin nhắn giữa 2 người chơi. | `main.py`, `connection_manager.py` |
 | 2 | [Tên Bạn BE 1] | ... | **Game Logic** | Thuật toán check thắng/thua (5 ô), validate nước đi hợp lệ. | `game_logic.py` |
 | 3 | Trần Phát Đạt | ... | **System & Data**| API Đăng ký/Đăng nhập, Quản lý file dữ liệu, lưu lịch sử đấu. | `api.py`, `database.py`, `models.py`, `data.json` |
-| 4 | [Tên Bạn FE 1] | ... | **FE Integration**| Xử lý sự kiện JS, kết nối Socket Client, nhận lệnh từ Server để vẽ. | `socket_client.js`, `main.js` |
+| 4 | Sim Lưu Gia Bảo | ... | **FE Integration**| Xử lý sự kiện JS, kết nối Socket Client, nhận lệnh từ Server để vẽ. | `socket_client.js`, `main.js` |
 | 5 |Lê Hoàng Nhật Bình] | ... | **UI/UX Design** | Thiết kế giao diện HTML/CSS, hiệu ứng bàn cờ, responsive. | `index.html`, `game.html`, `style.css` |
 
 ---
