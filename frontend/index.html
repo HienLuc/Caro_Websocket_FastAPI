@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ Game Caro</title>
+    <style>
+        /* Thiết lập để ảnh nền che kín toàn bộ màn hình */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            /* Thay đổi đường dẫn ảnh của bạn vào đây */
+            background-image: url('cach-choi-co-caro-7.jpg'); 
+            background-size: cover;      /* Ảnh bao phủ toàn bộ màn hình */
+            background-position: center; /* Ảnh luôn nằm chính giữa */
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Giữ nền cố định */
+            
+            /* Căn giữa nội dung bên trên ảnh */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Lớp phủ mờ để chữ dễ đọc hơn (tùy chọn) */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3); /* Làm tối ảnh 30% để nổi chữ */
+            z-index: 1;
+        }
+
+        /* Chỉnh tiêu đề nổi lên trên lớp nền */
+        h1 {
+            color: white;
+            font-size: 50px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8); /* Tạo bóng cho chữ dễ đọc */
+            z-index: 2;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Nút "Vào chơi ngay" */
+        .nut-bam {
+            z-index: 2;
+            display: inline-block;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 18px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .nut-bam:hover {
+            background-color: #0056b3;
+            transform: scale(1.1); /* Phóng to nút một chút khi di chuột */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <h1>Chào mừng bạn đến với Game Caro</h1>
+    
+    <a href="game.html" class="nut-bam">Vào chơi ngay</a>
+
+</body>
+</html>
+
 
