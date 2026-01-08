@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trận Đấu Cờ Caro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Trận Đấu Đang Diễn Ra</h1>
+        
+        <div id="result">Lượt của người chơi: <span id="turn">X</span></div>
+
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <button id="start-button" onclick="location.reload()">Chơi lại</button>
+            <button id="start-button" onclick="window.location.href='index.html'" style="background-color: #ffcccb;">Thoát</button>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
