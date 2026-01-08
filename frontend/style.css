@@ -1,0 +1,69 @@
+/* Căn giữa toàn bộ trò chơi trên màn hình */
+body {
+  font-family: cursive, sans-serif;
+  background-color: yellow; /* Nền trang màu vàng */
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  background-color: white; /* Khung trắng */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border: 4px solid green; /* Viền xanh lá */
+}
+
+/* Nút bắt đầu */
+#start-button {
+  padding: 8px 25px;
+  border-radius: 5px;
+  background-color: skyblue;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+#start-button:hover {
+  filter: brightness(0.9);
+}
+
+/* Bố cục bàn cờ 3x3 */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Từng ô vuông nhỏ */
+.board div {
+  width: 100px;
+  height: 100px;
+  background-color: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.4s ease;
+}
+
+/* Hiệu ứng khi thắng cuộc */
+.winning-cell {
+  background-color: #32cd32 !important; 
+  color: white;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  color: green;
+}
