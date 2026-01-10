@@ -2,34 +2,113 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trận Đấu Cờ Caro</title>
+    <title>Bàn Cờ Caro - Đang Thi Đấu</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-
-    <div class="container">
-        <h1>Trận Đấu Đang Diễn Ra</h1>
-        
-        <div id="result">Lượt của người chơi: <span id="turn">X</span></div>
-
-        <div class="board" id="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
+<body style="background-color: #e3f2fd;"> 
+    <div class="game-layout">
+        <div class="board-section">
+            <div class="board-header">
+                <i class="fas fa-hashtag"></i> Mã Phòng: <span id="room-id" style="color: red;">Đang tải...</span> 
+                <button class="btn" id="btn-copy" style="padding: 2px 10px; font-size: 12px; margin-left: 10px;">📋 Sao chép mã</button>
+            </div>
+            
+            <div class="caro-grid" id="caro-grid"></div>
         </div>
 
-        <div style="margin-top: 20px; display: flex; justify-content: center;">
-            <button id="start-button" onclick="location.reload()">Chơi lại từ đầu</button>
+        <div class="control-section">
+            <div class="status-box" style="text-align: center;">
+                <p style="margin: 0; font-weight: bold; color: #555;">LƯỢT ĐI HIỆN TẠI</p>
+                <div id="current-turn" style="font-size: 40px; font-weight: bold; color: red;">X</div>
+            </div>
+
+            <div class="player-card">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="color: blue; font-weight: bold;">O (Bạn)</span>
+                    <span style="color: red; font-weight: bold;">X (Đối thủ)</span>
+                </div>
+                <div style="font-size: 14px; color: #333;">
+                    Tỉ số ván: <b style="color: blue;">0</b> - <b style="color: red;">0</b>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <p style="margin: 0 0 5px 0; font-weight: bold; font-size: 13px;">HỘP THOẠI CHAT</p>
+                <div class="chat-logs" id="chat-logs">
+                    <div style="color: green; font-style: italic;">[Hệ thống]: Chào mừng bạn đã vào phòng!</div>
+                </div>
+                <div style="display: flex; gap: 2px;">
+                    <input type="text" placeholder="Nhập tin nhắn..." id="chat-input">
+                    <button class="btn" style="padding: 0 10px;" id="btn-send"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" style="background: #ef4444; color: white; border: none;"><i class="fas fa-flag"></i> Đầu hàng</button>
+                <button class="btn" style="background: #f59e0b; color: white; border: none;"><i class="fas fa-handshake"></i> Xin hòa</button>
+                <button class="btn" style="background: #64748b; color: white; border: none;"><i class="fas fa-rotate-right"></i> Chơi lại</button>
+            </div>
+
+            <button class="btn" style="margin-top: auto; color: darkblue;" onclick="window.location.href='index.html'">
+                <i class="fas fa-sign-out-alt"></i> Rời khỏi phòng
+            </button>
         </div>
     </div>
 
-    <script src="scripts.js"></script>
+    <script>
+        // TỰ ĐỘNG KHỚP MÃ PHÒNG KHI TẢI TRANG
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('id'); // Lấy mã sau dấu ?id=
+            if (roomId) {
+                document.getElementById('room-id').innerText = roomId;
+            } else {
+                document.getElementById('room-id').innerText = "Phòng tự do";
+            }
+        });
+
+        // Chức năng sao chép mã phòng để gửi cho bạn bè
+        document.getElementById('btn-copy').onclick = function() {
+            const roomId = document.getElementById('room-id').innerText;
+            navigator.clipboard.writeText(roomId);
+            alert("Đã sao chép mã phòng: " + roomId);
+        };
+
+        // KHỞI TẠO BÀN CỜ 15x15 (225 ô)
+        const grid = document.getElementById('caro-grid');
+        let currentSymbol = 'X';
+
+        for (let i = 0; i < 225; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'caro-cell';
+            cell.dataset.index = i;
+            cell.onclick = function() {
+                if (!this.innerText) {
+                    this.innerText = currentSymbol;
+                    this.style.color = (currentSymbol === 'X') ? 'red' : 'blue';
+                    
+                    // Đổi lượt đánh
+                    currentSymbol = (currentSymbol === 'X') ? 'O' : 'X';
+                    const turnDisplay = document.getElementById('current-turn');
+                    turnDisplay.innerText = currentSymbol;
+                    turnDisplay.style.color = (currentSymbol === 'X') ? 'red' : 'blue';
+                }
+            };
+            grid.appendChild(cell);
+        }
+
+        // Xử lý gửi tin nhắn Chat
+        document.getElementById('chat-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && this.value.trim() !== "") {
+                const logs = document.getElementById('chat-logs');
+                const msg = document.createElement('div');
+                msg.innerHTML = `<b>Bạn:</b> ${this.value}`;
+                logs.appendChild(msg);
+                logs.scrollTop = logs.scrollHeight; // Cuộn xuống tin nhắn mới nhất
+                this.value = "";
+            }
+        });
+    </script>
 </body>
 </html>
