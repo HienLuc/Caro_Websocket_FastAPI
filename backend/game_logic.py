@@ -1,108 +1,144 @@
 class GameLogic:
     def __init__(self):
-        # Quy định kích thước bàn cờ (thường là 15x15 hoặc 20x20)
-        # Bạn có thể điều chỉnh số này khớp với Frontend
+        # Kích thước bàn cờ (nên khớp với Frontend)
         self.BOARD_SIZE = 15 
 
     def check_valid_move(self, board: list, row: int, col: int) -> bool:
         """
-        Kiểm tra xem nước đi tại (row, col) có hợp lệ không.
-        1. Tọa độ phải nằm trong bàn cờ (0 <= x < BOARD_SIZE).
-        2. Ô đó phải đang trống (giá trị là 0 hoặc None hoặc rỗng).
+        Kiểm tra nước đi hợp lệ:
+        1. Tọa độ nằm trong bàn cờ.
+        2. Ô chưa có quân.
         """
-        # Kiểm tra biên (nằm ngoài bàn cờ thì sai)
-        if row < 0 or row >= self.BOARD_SIZE or col < 0 or col >= self.BOARD_SIZE:
+        # 1. Kiểm tra biên
+        if not (0 <= row < self.BOARD_SIZE and 0 <= col < self.BOARD_SIZE):
             return False
         
-        # Kiểm tra ô đã có quân chưa (Giả sử 0 là ô trống)
+        # 2. Kiểm tra ô trống (giả sử 0 là trống)
         if board[row][col] != 0:
             return False
             
         return True
 
+    def check_full_board(self, board: list) -> bool:
+        """
+        Kiểm tra bàn cờ đã đầy chưa (Xử lý hòa).
+        Trả về True nếu không còn ô trống nào.
+        """
+        for r in range(self.BOARD_SIZE):
+            for c in range(self.BOARD_SIZE):
+                if board[r][c] == 0:
+                    return False
+        return True
+
     def check_win(self, board: list, row: int, col: int, player_id: int) -> bool:
         """
-        Kiểm tra chiến thắng ngay sau khi người chơi đánh vào (row, col).
-        Thuật toán: Quét từ vị trí vừa đánh ra 4 hướng (Ngang, Dọc, Chéo chính, Chéo phụ).
-        Nếu hướng nào đủ 5 quân liên tiếp của player_id thì thắng.
+        Kiểm tra chiến thắng với luật:
+        - 5 quân liên tiếp.
+        - KHÔNG bị chặn 2 đầu bởi đối thủ (Luật Caro Việt Nam).
         """
-        
-        # Các hướng cần kiểm tra: (thay đổi hàng, thay đổi cột)
         directions = [
-            (0, 1),   # Ngang (chỉ thay đổi cột)
-            (1, 0),   # Dọc (chỉ thay đổi hàng)
-            (1, 1),   # Chéo chính (hướng Đông Nam)
-            (1, -1)   # Chéo phụ (hướng Đông Bắc)
+            (0, 1),   # Ngang
+            (1, 0),   # Dọc
+            (1, 1),   # Chéo chính (Đông Nam)
+            (1, -1)   # Chéo phụ (Đông Bắc)
         ]
 
+        # Xác định ID đối thủ (Nếu mình là 1 thì địch là 2, và ngược lại)
+        opponent_id = 2 if player_id == 1 else 1
+
         for dr, dc in directions:
-            count = 1  # Đếm quân vừa đánh là 1
+            count = 1  # Đếm quân vừa đánh
             
-            # 1. Duyệt về phía dương (Positive direction)
-            # Ví dụ: Nếu đang xét hàng ngang, thì duyệt sang phải
-            r, c = row + dr, col + dc
-            while 0 <= r < self.BOARD_SIZE and 0 <= c < self.BOARD_SIZE and board[r][c] == player_id:
+            # --- Duyệt chiều dương (+) ---
+            r_pos, c_pos = row + dr, col + dc
+            while 0 <= r_pos < self.BOARD_SIZE and 0 <= c_pos < self.BOARD_SIZE and board[r_pos][c_pos] == player_id:
                 count += 1
-                r += dr
-                c += dc
-
-            # 2. Duyệt về phía âm (Negative direction)
-            # Ví dụ: Nếu đang xét hàng ngang, thì duyệt sang trái
-            r, c = row - dr, col - dc
-            while 0 <= r < self.BOARD_SIZE and 0 <= c < self.BOARD_SIZE and board[r][c] == player_id:
+                r_pos += dr
+                c_pos += dc
+            
+            # --- Duyệt chiều âm (-) ---
+            r_neg, c_neg = row - dr, col - dc
+            while 0 <= r_neg < self.BOARD_SIZE and 0 <= c_neg < self.BOARD_SIZE and board[r_neg][c_neg] == player_id:
                 count += 1
-                r -= dr
-                c -= dc
+                r_neg -= dr
+                c_neg -= dc
 
-            # Nếu hướng này đủ 5 quân trở lên -> THẮNG
+            # Nếu đủ 5 quân trở lên -> Kiểm tra điều kiện chặn 2 đầu
             if count >= 5:
+                # Kiểm tra đầu dương có bị chặn không?
+                # (Bị chặn nếu ô tiếp theo nằm trong bàn cờ VÀ là quân địch)
+                is_blocked_pos = False
+                if 0 <= r_pos < self.BOARD_SIZE and 0 <= c_pos < self.BOARD_SIZE:
+                    if board[r_pos][c_pos] == opponent_id:
+                        is_blocked_pos = True
+                
+                # Kiểm tra đầu âm có bị chặn không?
+                is_blocked_neg = False
+                if 0 <= r_neg < self.BOARD_SIZE and 0 <= c_neg < self.BOARD_SIZE:
+                    if board[r_neg][c_neg] == opponent_id:
+                        is_blocked_neg = True
+
+                # Nếu bị chặn cả 2 đầu -> KHÔNG TÍNH THẮNG (Luật VN)
+                if is_blocked_pos and is_blocked_neg:
+                    continue # Bỏ qua hướng này, xét hướng khác
+                
+                # Nếu không bị chặn 2 đầu -> THẮNG
                 return True
 
-        return False  
+        return False
 
-        # ==========================================
-# PHẦN TEST CHẠY THỬ (Dán ở cuối file)
+# ==========================================
+# PHẦN TEST CHẠY THỬ (Unit Test)
 # ==========================================
 if __name__ == "__main__":
-    # 1. Khởi tạo logic game
     logic = GameLogic()
     
-    # 2. Tạo một bàn cờ rỗng 15x15 (toàn số 0)
-    # Giả sử: 0 là rỗng, 1 là Player X, 2 là Player O
+    # Tạo bàn cờ rỗng
     fake_board = [[0 for _ in range(15)] for _ in range(15)]
 
-    print("--- BẮT ĐẦU TEST ---")
+    print("\n--- BẮT ĐẦU TEST LOGIC ---")
 
-    # TEST 1: Đánh thử một nước hợp lệ
-    row, col = 7, 7
-    player_id = 1 # Người chơi 1
-    
-    # Giả vờ đánh vào bàn cờ
-    fake_board[row][col] = player_id 
-    
-    print(f"Test 1: Đánh vào ô ({row}, {col})...")
-    if logic.check_valid_move(fake_board, 0, 0): # Check ô (0,0) đang trống
-        print("-> Check Valid: OK (Hợp lệ)")
+    # TEST 1: Check Valid
+    print("1. Test nước đi hợp lệ:")
+    fake_board[5][5] = 1
+    if not logic.check_valid_move(fake_board, 5, 5):
+        print("   -> OK: Không cho đánh đè lên quân cũ.")
     else:
-        print("-> Check Valid: FAILED (Sai)")
+        print("   -> LỖI: Vẫn cho đánh đè!")
 
-    # TEST 2: Giả lập thắng (5 con liên tiếp hàng ngang)
-    print("\nTest 2: Thử tạo 5 quân liên tiếp hàng ngang...")
-    # Đặt sẵn 4 quân
-    fake_board[8][0] = 1
-    fake_board[8][1] = 1
-    fake_board[8][2] = 1
-    fake_board[8][3] = 1
+    # TEST 2: Thắng thường (Ngang)
+    print("\n2. Test thắng thường (5 ô ngang):")
+    # Reset row 8
+    for c in range(15): fake_board[8][c] = 0
+    # Xếp: X X X X _
+    for c in range(4): fake_board[8][c] = 1
+    # Đánh con thứ 5
+    fake_board[8][4] = 1
+    if logic.check_win(fake_board, 8, 4, 1):
+        print("   -> OK: Đã nhận diện chiến thắng.")
+    else:
+        print("   -> LỖI: Không nhận diện được chiến thắng.")
+
+    # TEST 3: Luật chặn 2 đầu (Quan trọng)
+    print("\n3. Test luật chặn 2 đầu (O X X X X X O):")
+    # Reset row 9
+    for c in range(15): fake_board[9][c] = 0
     
-    # Đánh quân thứ 5 vào vị trí (8, 4)
-    fake_board[8][4] = 1 
+    # Xếp tình huống: O X X X X _ O (Địch chặn 2 đầu, chừa 1 lỗ ở giữa để mình đánh)
+    fake_board[9][0] = 2 # Địch chặn trái
+    fake_board[9][1] = 1
+    fake_board[9][2] = 1
+    fake_board[9][3] = 1
+    fake_board[9][4] = 1
+    fake_board[9][6] = 2 # Địch chặn phải
     
-    # Kiểm tra xem có báo thắng không
-    is_win = logic.check_win(fake_board, 8, 4, 1)
+    # Mình đánh vào ô trống (9, 5) để tạo thành 5 con
+    fake_board[9][5] = 1
     
+    is_win = logic.check_win(fake_board, 9, 5, 1)
     if is_win:
-        print("-> KẾT QUẢ: ĐÚNG! (Đã phát hiện chiến thắng)")
+        print("   -> LỖI: Bị chặn 2 đầu mà vẫn báo thắng!")
     else:
-        print("-> KẾT QUẢ: SAI! (Không phát hiện được chiến thắng)")
+        print("   -> OK: Bị chặn 2 đầu nên KHÔNG tính thắng (Đúng luật).")
 
-    print("--- KẾT THÚC TEST ---")
+    print("\n--- KẾT THÚC TEST ---")
