@@ -95,7 +95,7 @@
             showScreen('screen-login');
         }
 
-        // CHỨC NĂNG KẾT NỐI: Gửi mã phòng sang trang game.html
+        // CHỨC NĂNG KẾT NỐI
         function joinRoom(roomId) {
             window.location.href = `game.html?id=${encodeURIComponent(roomId)}`;
         }
@@ -106,7 +106,7 @@
             if (emptyMsg) emptyMsg.remove();
 
             const roomList = document.getElementById('room-list');
-            // Tạo mã phòng (ví dụ: phong-a1b2c3)
+            // Tạo mã phòng 
             const roomId = "phong-" + Math.random().toString(36).substr(2, 6);
 
             const card = document.createElement('div');
@@ -121,3 +121,4 @@
     </script>
 </body>
 </html>
+
