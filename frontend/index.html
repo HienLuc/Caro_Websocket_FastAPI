@@ -1,19 +1,123 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Cờ Caro 3x3</title>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Cờ Caro (Tic Tac Toe)</h1>
-      <button id="start-button" onclick="window.location.href='game.html'">Bắt đầu chơi</button>
-      <div id="result"></div>
-      <div class="board" id="board"></div>
-    </div>
-    <script src="scripts.js"></script>
-  </body>
-</html>
+<head>
+    <meta charset="UTF-8">
+    <title>Caro Online - Sảnh Chờ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
 
+    <div id="screen-login" class="window-border">
+        <h2>Đăng Nhập</h2>
+        <div class="input-group">
+            <label>Tên tài khoản:</label>
+            <input type="text" id="l-user" placeholder="Nhập tên của bạn...">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="l-pass">
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 40px; gap: 10px;">
+            <button class="btn" onclick="handleLogin()">Đăng nhập</button>
+            <button class="btn" onclick="showScreen('screen-register')">Đăng ký</button>
+            <button class="btn" style="font-style: italic;">Thoát</button>
+        </div>
+    </div>
+
+    <div id="screen-register" class="window-border hidden">
+        <h2>Đăng Ký Tài Khoản</h2>
+        <div class="input-group">
+            <label>Tên đăng nhập:</label>
+            <input type="text" id="r-user">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="r-pass">
+        </div>
+        <div class="input-group">
+            <label>Nhập lại:</label>
+            <input type="password" id="r-repass">
+        </div>
+        <div id="message"></div>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+            <button class="btn" onclick="handleRegister()">Xác nhận</button>
+            <button class="btn" onclick="showScreen('screen-login')">Quay lại</button>
+        </div>
+    </div>
+
+    <div id="screen-lobby" class="window-border hidden">
+        <div class="lobby-header">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="player-name">Người chơi 1</span>
+            </div>
+            <button class="btn" style="color: green; border-color: green;" onclick="createNewRoom()">+ Tạo phòng mới</button>
+        </div>
+
+        <h2 style="font-size: 20px; font-style: italic;">Danh sách phòng đang chờ</h2>
+        
+        <div id="room-list" class="room-list-container">
+            <p id="empty-msg" style="grid-column: 1/-1; color: #888; margin-top: 50px;">
+                Chưa có phòng nào. Hãy tạo phòng mới ngay!
+            </p>
+        </div>
+
+        <button class="btn" style="position: absolute; bottom: 20px; right: 20px;" onclick="showScreen('screen-login')">Đăng xuất</button>
+    </div>
+
+    <script>
+        // Chuyển đổi giữa các màn hình (Login, Register, Lobby)
+        function showScreen(screenId) {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-register').classList.add('hidden');
+            document.getElementById('screen-lobby').classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        // Xử lý đăng nhập
+        function handleLogin() {
+            const user = document.getElementById('l-user').value.trim();
+            if (!user) { alert("Vui lòng nhập Tên tài khoản!"); return; }
+            document.getElementById('player-name').innerText = user;
+            showScreen('screen-lobby');
+        }
+
+        // Xử lý đăng ký
+        function handleRegister() {
+            const pass = document.getElementById('r-pass').value;
+            const repass = document.getElementById('r-repass').value;
+            if (pass !== repass) {
+                document.getElementById('message').innerText = "Mật khẩu không khớp!";
+                return;
+            }
+            alert("Đăng ký thành công!");
+            showScreen('screen-login');
+        }
+
+        // CHỨC NĂNG KẾT NỐI: Gửi mã phòng sang trang game.html
+        function joinRoom(roomId) {
+            window.location.href = `game.html?id=${encodeURIComponent(roomId)}`;
+        }
+
+        // Tạo phòng mới với ID ngẫu nhiên
+        function createNewRoom() {
+            const emptyMsg = document.getElementById('empty-msg');
+            if (emptyMsg) emptyMsg.remove();
+
+            const roomList = document.getElementById('room-list');
+            // Tạo mã phòng (ví dụ: phong-a1b2c3)
+            const roomId = "phong-" + Math.random().toString(36).substr(2, 6);
+
+            const card = document.createElement('div');
+            card.className = 'room-card';
+            card.innerHTML = `
+                <h4 style="margin:0; color: darkblue;">${roomId}</h4>
+                <div class="room-status-icon" style="font-size: 12px; color: #666;">Trạng thái: Đang chờ</div>
+                <button class="btn-join" onclick="joinRoom('${roomId}')">Tham gia</button>
+            `;
+            roomList.appendChild(card);
+        }
+    </script>
+</body>
+</html>
