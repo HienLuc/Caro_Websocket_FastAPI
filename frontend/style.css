@@ -1,93 +1,217 @@
-/* Tổng thể trang */
+:root {
+    --primary-green: #2ecc71;
+    --primary-hover: #27ae60;
+}
+
 body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #ffffff;
+}
+
+header {
+    background-color: #000;
+    color: white;
+    padding: 0 4%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 65px;
+}
+
+.logo {
+    color: var(--primary-green);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.user-menu-container { position: relative; }
+#userIcon { font-size: 30px; cursor: pointer; transition: 0.3s; }
+#userIcon:hover { color: var(--primary-green); }
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background-color: #1a1a1a;
+    min-width: 200px;
+    border: 1px solid #333;
+    z-index: 100;
+}
+
+.dropdown-content.show { display: block; }
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover { background-color: #333; color: var(--primary-green); }
+
+.lobby-container { display: flex; height: calc(100vh - 65px); }
+
+.lobby-main {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), url('caro_1.png');
+    background-size: cover;
 }
 
-/* Khung viền cửa sổ */
-.window-border {
-    border: 8px solid #5fb391;
-    padding: 30px 40px;
-    background-color: #e9e9e9;
-    width: 450px;
+.welcome-box {
     text-align: center;
-    box-shadow: 4px 4px 15px rgba(0,0,0,0.2);
-    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-h2 { color: red; font-size: 28px; margin-bottom: 30px; margin-top: 0; }
+.welcome-box h1 { font-size: 36px; color: #222; margin-bottom: 10px; }
 
-.input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-.input-group label { color: darkblue; font-weight: bold; font-size: 16px; width: 140px; text-align: left; }
-.input-group input { flex: 1; padding: 8px; font-size: 16px; border: 1px solid #7a7a7a; border-radius: 4px; }
-
-.btn {
-    padding: 8px 15px;
-    font-weight: bold;
-    font-size: 15px;
-    cursor: pointer;
-    border: 1px solid #7a7a7a;
-    background: linear-gradient(to bottom, #ffffff 0%, #d1e1f1 100%);
-    color: red;
+.sidebar-online {
+    width: 300px;
+    background-color: #f9f9f9;
+    border-left: 1px solid #ddd;
 }
 
-.hidden { display: none !important; }
-
-/* CSS cho danh sách phòng ở Sảnh */
-.room-list-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
-    max-height: 250px;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.room-card {
-    background: white;
-    border: 2px solid #5fb391;
-    padding: 12px;
+.online-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    border-radius: 5px;
 }
 
-.btn-join {
-    background: #5fb391;
+.count-badge {
+    background-color: var(--primary-green);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+}
+
+.user-item-wrapper { position: relative; }
+
+.user-item {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.status-dot {
+    height: 10px;
+    width: 10px;
+    background-color: var(--primary-green);
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.btn-challenge {
+    background-color: var(--primary-green);
     color: white;
     border: none;
     padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
+}
+
+.challenge-pop {
+    position: absolute;
+    right: 305px;
+    top: 0;
+    background-color: #1a1a1a;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 220px;
+    z-index: 1000;
+    border: 1px solid var(--primary-green);
+}
+
+.pop-arrow {
+    position: absolute;
+    right: -10px;
+    top: 20px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid var(--primary-green);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-box {
+    background-color: rgba(0,0,0,0.9);
+    padding: 50px;
+    width: 380px;
+    border-radius: 8px;
+    color: white;
+    position: relative;
+    border-top: 5px solid var(--primary-green);
+}
+
+.form-group { position: relative; margin-bottom: 20px; }
+
+.form-group input {
     width: 100%;
+    padding: 15px 10px 5px;
+    background: #333;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    box-sizing: border-box;
+}
+
+.form-group label {
+    position: absolute;
+    left: 10px;
+    top: 15px;
+    color: #8c8c8c;
+    transition: 0.2s;
+    pointer-events: none;
+}
+
+.form-group input:focus ~ label,
+.form-group input:not(:placeholder-shown) ~ label {
+    top: 5px;
+    font-size: 11px;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
     font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-.btn-join:hover { background: #4ca181; }
+.switch-mode { color: #737373; margin-top: 25px; }
+.switch-mode a { color: white; text-decoration: none; font-weight: bold; }
 
-/* Giao diện bàn cờ trận đấu */
-.game-layout { display: flex; gap: 20px; padding: 20px; background: white; border: 8px solid #5fb391; border-radius: 8px; }
-.board-header { background: #f5f5f5; padding: 10px; font-weight: bold; border: 1px solid #ccc; margin-bottom: 10px; border-radius: 4px; }
-.caro-grid {
-    display: grid;
-    grid-template-columns: repeat(15, 30px);
-    grid-template-rows: repeat(15, 30px);
-    gap: 1px; background-color: #999; border: 2px solid #999;
-}
-.caro-cell {
-    width: 30px; height: 30px; background: white;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 20px; font-weight: bold; cursor: pointer;
-}
-.caro-cell:hover { background: #ffffd0; }
+.hidden { display: none !important; }
 
-.control-section { width: 250px; display: flex; flex-direction: column; gap: 12px; }
-.status-box, .player-card, .chat-area { border: 1px solid #7a7a7a; padding: 10px; background: #f9f9f9; border-radius: 4px; }
-.chat-logs { height: 130px; background: white; border: 1px solid #ccc; overflow-y: auto; padding: 8px; font-size: 13px; margin-bottom: 5px; }
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
