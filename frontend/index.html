@@ -2,123 +2,176 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Caro Online - Sảnh Chờ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Cờ Caro - Sảnh Chờ</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <div id="screen-login" class="window-border">
-        <h2>Đăng Nhập</h2>
-        <div class="input-group">
-            <label>Tên tài khoản:</label>
-            <input type="text" id="l-user" placeholder="Nhập tên của bạn...">
-        </div>
-        <div class="input-group">
-            <label>Mật khẩu:</label>
-            <input type="password" id="l-pass">
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-top: 40px; gap: 10px;">
-            <button class="btn" onclick="handleLogin()">Đăng nhập</button>
-            <button class="btn" onclick="showScreen('screen-register')">Đăng ký</button>
-            <button class="btn" style="font-style: italic;">Thoát</button>
-        </div>
-    </div>
-
-    <div id="screen-register" class="window-border hidden">
-        <h2>Đăng Ký Tài Khoản</h2>
-        <div class="input-group">
-            <label>Tên đăng nhập:</label>
-            <input type="text" id="r-user">
-        </div>
-        <div class="input-group">
-            <label>Mật khẩu:</label>
-            <input type="password" id="r-pass">
-        </div>
-        <div class="input-group">
-            <label>Nhập lại:</label>
-            <input type="password" id="r-repass">
-        </div>
-        <div id="message"></div>
-        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
-            <button class="btn" onclick="handleRegister()">Xác nhận</button>
-            <button class="btn" onclick="showScreen('screen-login')">Quay lại</button>
-        </div>
-    </div>
-
-    <div id="screen-lobby" class="window-border hidden">
-        <div class="lobby-header">
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span id="player-name">Người chơi 1</span>
+    <header>
+        <div class="logo">TRÒ CHƠI CARO</div>
+        <div class="header-right">
+            <div class="user-menu-container">
+                <i class="fas fa-user-circle" id="userIcon" onclick="toggleDropdown()"></i>
+                <div class="dropdown-content" id="userDropdown">
+                    <div id="guestMenu">
+                        <a href="javascript:void(0)" onclick="openModal('login')">Đăng nhập</a>
+                        <a href="javascript:void(0)" onclick="openModal('register')">Đăng ký</a>
+                    </div>
+                    <div id="userMenu" class="hidden">
+                        <div class="user-info-header">Chào, <span id="displayUsername">Player</span></div>
+                        <a href="javascript:void(0)"><i class="fas fa-info-circle"></i> Thông tin</a>
+                        <a href="javascript:void(0)"><i class="fas fa-history"></i> Lịch sử đấu</a>
+                        <hr style="border: 0; border-top: 1px solid #333; margin: 0;">
+                        <a href="javascript:void(0)" onclick="handleLogout()" style="color: #2ecc71;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                    </div>
+                </div>
             </div>
-            <button class="btn" style="color: green; border-color: green;" onclick="createNewRoom()">+ Tạo phòng mới</button>
         </div>
+    </header>
 
-        <h2 style="font-size: 20px; font-style: italic;">Danh sách phòng đang chờ</h2>
-        
-        <div id="room-list" class="room-list-container">
-            <p id="empty-msg" style="grid-column: 1/-1; color: #888; margin-top: 50px;">
-                Chưa có phòng nào. Hãy tạo phòng mới ngay!
-            </p>
+    <main class="lobby-container">
+        <section class="lobby-main">
+            <div class="welcome-box">
+                <h1>Chào mừng đến với trò chơi Caro</h1>
+                <p>Hệ thống thách đấu trực tiếp qua Socket Network</p>
+            </div>
+        </section>
+
+        <aside class="sidebar-online">
+            <div class="online-header">
+                <h3><i class="fas fa-signal"></i> ĐANG ONLINE</h3>
+                <span class="count-badge">1</span>
+            </div>
+            <div class="user-list" id="onlineUsers">
+                <div class="user-item-wrapper">
+                    <div class="user-item">
+                        <div class="user-info">
+                            <span class="status-dot"></span> 
+                            <span class="username">Admin_Master</span>
+                        </div>
+                        <button class="btn-challenge" onclick="toggleChallengePop('Admin_Master')">Thách đấu</button>
+                    </div>
+                    <div id="pop-Admin_Master" class="challenge-pop hidden">
+                        <p>Thách đấu <strong>Admin_Master</strong>?</p>
+                        <div class="pop-actions">
+                            <button class="btn-confirm" onclick="acceptChallenge('Admin_Master')">Chấp nhận</button>
+                            <button class="btn-cancel" onclick="toggleChallengePop('Admin_Master')">Từ chối</button>
+                        </div>
+                        <div class="pop-arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <div id="authModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 id="modalTitle">Đăng Nhập</h2>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <input type="text" id="usernameInput" required placeholder=" ">
+                    <label>Tên tài khoản</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="passwordInput" required placeholder=" ">
+                    <label>Mật khẩu</label>
+                </div>
+                <div id="registerFields" class="hidden">
+                    <div class="form-group">
+                        <input type="password" id="confirmPasswordInput" placeholder=" ">
+                        <label>Xác nhận mật khẩu</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="submitBtn">Xác nhận</button>
+                
+                <p class="switch-mode">
+                    <span id="switchText">Chưa có tài khoản?</span> 
+                    <a href="javascript:void(0)" id="switchBtn" onclick="toggleAuthMode()">Đăng ký ngay</a>
+                </p>
+            </form>
+            <button class="close-btn" onclick="closeModal()">×</button>
         </div>
-
-        <button class="btn" style="position: absolute; bottom: 20px; right: 20px;" onclick="showScreen('screen-login')">Đăng xuất</button>
     </div>
 
     <script>
-        // Chuyển đổi giữa các màn hình (Login, Register, Lobby)
-        function showScreen(screenId) {
-            document.getElementById('screen-login').classList.add('hidden');
-            document.getElementById('screen-register').classList.add('hidden');
-            document.getElementById('screen-lobby').classList.add('hidden');
-            document.getElementById(screenId).classList.remove('hidden');
+        let isLoginMode = true;
+
+        function toggleDropdown() {
+            document.getElementById('userDropdown').classList.toggle('show');
         }
 
-        // Xử lý đăng nhập
-        function handleLogin() {
-            const user = document.getElementById('l-user').value.trim();
-            if (!user) { alert("Vui lòng nhập Tên tài khoản!"); return; }
-            document.getElementById('player-name').innerText = user;
-            showScreen('screen-lobby');
+        function openModal(mode) {
+            isLoginMode = (mode === 'login');
+            updateModalUI();
+            document.getElementById('authModal').classList.remove('hidden');
         }
 
-        // Xử lý đăng ký
-        function handleRegister() {
-            const pass = document.getElementById('r-pass').value;
-            const repass = document.getElementById('r-repass').value;
-            if (pass !== repass) {
-                document.getElementById('message').innerText = "Mật khẩu không khớp!";
-                return;
+        function closeModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            updateModalUI();
+        }
+
+        function updateModalUI() {
+            const title = document.getElementById('modalTitle');
+            const regFields = document.getElementById('registerFields');
+            const switchText = document.getElementById('switchText');
+            const switchBtn = document.getElementById('switchBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (isLoginMode) {
+                title.innerText = 'Đăng Nhập';
+                regFields.classList.add('hidden');
+                switchText.innerText = 'Chưa có tài khoản?';
+                switchBtn.innerText = 'Đăng ký ngay';
+                submitBtn.innerText = 'Đăng Nhập';
+                submitBtn.style.backgroundColor = "#2ecc71";
+            } else {
+                title.innerText = 'Đăng Ký';
+                regFields.classList.remove('hidden');
+                switchText.innerText = 'Đã có tài khoản?';
+                switchBtn.innerText = 'Đăng nhập ngay';
+                submitBtn.innerText = 'Tạo Tài Khoản';
+                submitBtn.style.backgroundColor = "#2ecc71";
             }
-            alert("Đăng ký thành công!");
-            showScreen('screen-login');
         }
 
-        // CHỨC NĂNG KẾT NỐI
-        function joinRoom(roomId) {
-            window.location.href = `game.html?id=${encodeURIComponent(roomId)}`;
+        function acceptChallenge(username) {
+            const roomId = 'ROOM-' + Math.floor(1000 + Math.random() * 9000);
+            window.location.href = `game.html?id=${roomId}&opponent=${username}`;
         }
 
-        // Tạo phòng mới với ID ngẫu nhiên
-        function createNewRoom() {
-            const emptyMsg = document.getElementById('empty-msg');
-            if (emptyMsg) emptyMsg.remove();
+        function handleAuth(e) {
+            e.preventDefault();
+            const username = document.getElementById('usernameInput').value;
+            document.getElementById('guestMenu').classList.add('hidden');
+            document.getElementById('userMenu').classList.remove('hidden');
+            document.getElementById('displayUsername').innerText = username;
+            closeModal();
+        }
 
-            const roomList = document.getElementById('room-list');
-            // Tạo mã phòng 
-            const roomId = "phong-" + Math.random().toString(36).substr(2, 6);
+        function handleLogout() {
+            location.reload();
+        }
 
-            const card = document.createElement('div');
-            card.className = 'room-card';
-            card.innerHTML = `
-                <h4 style="margin:0; color: darkblue;">${roomId}</h4>
-                <div class="room-status-icon" style="font-size: 12px; color: #666;">Trạng thái: Đang chờ</div>
-                <button class="btn-join" onclick="joinRoom('${roomId}')">Tham gia</button>
-            `;
-            roomList.appendChild(card);
+        function toggleChallengePop(username) {
+            document.getElementById('pop-' + username).classList.toggle('hidden');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('#userIcon')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
         }
     </script>
 </body>
 </html>
-
