@@ -5,13 +5,108 @@
     <title>Bàn Cờ Caro - Đang Thi Đấu</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS nội bộ để khớp chính xác với ảnh chụp màn hình */
+        body {
+            background-color: #e3f2fd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .game-layout {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            border: 8px solid #5fb391; /* Viền xanh đặc trưng trong ảnh */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .board-header {
+            background: #f5f5f5;
+            padding: 10px;
+            font-weight: bold;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .caro-grid {
+            display: grid;
+            grid-template-columns: repeat(15, 30px);
+            grid-template-rows: repeat(15, 30px);
+            gap: 1px;
+            background-color: #999;
+            border: 2px solid #999;
+        }
+
+        .caro-cell {
+            width: 30px;
+            height: 30px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .control-section {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-box, .player-card, .chat-area {
+            border: 1px solid #7a7a7a;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .chat-logs {
+            height: 150px;
+            background: white;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+            padding: 8px;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .action-buttons button {
+            padding: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .btn-copy {
+            background: #f5f5f5;
+            border: 1px solid #ccc;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+    </style>
 </head>
-<body style="background-color: #e3f2fd;"> 
+<body> 
     <div class="game-layout">
         <div class="board-section">
             <div class="board-header">
-                <i class="fas fa-hashtag"></i> Mã Phòng: <span id="room-id" style="color: red;">Đang tải...</span> 
-                <button class="btn" id="btn-copy" style="padding: 2px 10px; font-size: 12px; margin-left: 10px;">📋 Sao chép mã</button>
+                <div># Mã Phòng: <span id="room-id" style="color: red;">Phòng tự do</span></div>
+                <button class="btn-copy" onclick="copyRoomId()">📋 Sao chép mã</button>
             </div>
             
             <div class="caro-grid" id="caro-grid"></div>
@@ -26,7 +121,7 @@
             <div class="player-card">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span style="color: blue; font-weight: bold;">O (Bạn)</span>
-                    <span style="color: red; font-weight: bold;">X (Đối thủ)</span>
+                    <span style="color: red; font-weight: bold;" id="opp-name">X (Đối thủ)</span>
                 </div>
                 <div style="font-size: 14px; color: #333;">
                     Tỉ số ván: <b style="color: blue;">0</b> - <b style="color: red;">0</b>
@@ -34,61 +129,55 @@
             </div>
 
             <div class="chat-area">
-                <p style="margin: 0 0 5px 0; font-weight: bold; font-size: 13px;">HỘP THOẠI CHAT</p>
+                <p style="margin: 0 0 5px 0; font-weight: bold; font-size: 12px; color: #333;">HỘP THOẠI CHAT</p>
                 <div class="chat-logs" id="chat-logs">
                     <div style="color: green; font-style: italic;">[Hệ thống]: Chào mừng bạn đã vào phòng!</div>
                 </div>
                 <div style="display: flex; gap: 2px;">
-                    <input type="text" placeholder="Nhập tin nhắn..." id="chat-input">
-                    <button class="btn" style="padding: 0 10px;" id="btn-send"><i class="fas fa-paper-plane"></i></button>
+                    <input type="text" placeholder="Nhập tin nhắn..." id="chat-input" style="flex: 1; padding: 5px; border: 1px solid #ccc;">
+                    <button style="background: none; border: none; cursor: pointer; color: red;" id="btn-send">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="action-buttons">
-                <button class="btn" style="background: #ef4444; color: white; border: none;"><i class="fas fa-flag"></i> Đầu hàng</button>
-                <button class="btn" style="background: #f59e0b; color: white; border: none;"><i class="fas fa-handshake"></i> Xin hòa</button>
-                <button class="btn" style="background: #64748b; color: white; border: none;"><i class="fas fa-rotate-right"></i> Chơi lại</button>
+            <div class="action-buttons" style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="display: flex; gap: 5px;">
+                    <button style="background: #ef4444; flex: 1;"><i class="fas fa-flag"></i> Đầu hàng</button>
+                    <button style="background: #f59e0b; flex: 1;"><i class="fas fa-handshake"></i> Xin hòa</button>
+                </div>
+                <button style="background: #64748b;"><i class="fas fa-rotate-right"></i> Chơi lại</button>
             </div>
 
-            <button class="btn" style="margin-top: auto; color: darkblue;" onclick="window.location.href='index.html'">
+            <button style="margin-top: auto; padding: 10px; font-weight: bold; background: #e0e7ff; border: 1px solid #312e81; color: #312e81; cursor: pointer; border-radius: 4px;" onclick="window.location.href='index.html'">
                 <i class="fas fa-sign-out-alt"></i> Rời khỏi phòng
             </button>
         </div>
     </div>
 
     <script>
-        // TỰ ĐỘNG KHỚP MÃ PHÒNG KHI TẢI TRANG
         document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomId = urlParams.get('id'); // Lấy mã sau dấu ?id=
-            if (roomId) {
-                document.getElementById('room-id').innerText = roomId;
-            } else {
-                document.getElementById('room-id').innerText = "Phòng tự do";
-            }
+            const params = new URLSearchParams(window.location.search);
+            const roomId = params.get('id');
+            const opponent = params.get('opponent');
+            if(roomId) document.getElementById('room-id').innerText = roomId;
+            if(opponent) document.getElementById('opp-name').innerText = opponent + " (X)";
         });
 
-        // Chức năng sao chép mã phòng để gửi cho bạn bè
-        document.getElementById('btn-copy').onclick = function() {
-            const roomId = document.getElementById('room-id').innerText;
-            navigator.clipboard.writeText(roomId);
-            alert("Đã sao chép mã phòng: " + roomId);
-        };
+        function copyRoomId() {
+            navigator.clipboard.writeText(document.getElementById('room-id').innerText);
+            alert("Đã sao chép mã phòng!");
+        }
 
-        // KHỞI TẠO BÀN CỜ 15x15 (225 ô)
         const grid = document.getElementById('caro-grid');
         let currentSymbol = 'X';
-
         for (let i = 0; i < 225; i++) {
             const cell = document.createElement('div');
             cell.className = 'caro-cell';
-            cell.dataset.index = i;
             cell.onclick = function() {
                 if (!this.innerText) {
                     this.innerText = currentSymbol;
                     this.style.color = (currentSymbol === 'X') ? 'red' : 'blue';
-                    
-                    // Đổi lượt đánh
                     currentSymbol = (currentSymbol === 'X') ? 'O' : 'X';
                     const turnDisplay = document.getElementById('current-turn');
                     turnDisplay.innerText = currentSymbol;
@@ -98,14 +187,13 @@
             grid.appendChild(cell);
         }
 
-        // Xử lý gửi tin nhắn Chat
         document.getElementById('chat-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter' && this.value.trim() !== "") {
                 const logs = document.getElementById('chat-logs');
                 const msg = document.createElement('div');
                 msg.innerHTML = `<b>Bạn:</b> ${this.value}`;
                 logs.appendChild(msg);
-                logs.scrollTop = logs.scrollHeight; // Cuộn xuống tin nhắn mới nhất
+                logs.scrollTop = logs.scrollHeight;
                 this.value = "";
             }
         });
