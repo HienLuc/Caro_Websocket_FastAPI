@@ -2,32 +2,80 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Trò Chơi Caro</title>
+    <title>Caro Battle - Login</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div id="page-auth" class="auth-container">
+        
         <div class="auth-card" id="form-login">
-            <h1 style="color:var(--primary); font-weight:800; font-size:26px; margin-bottom:20px;">TRÒ CHƠI CARO</h1>
-            <h2 style="margin-bottom: 20px; font-size: 18px; color: #64748b;">ĐĂNG NHẬP</h2>
-            <div class="input-group"><input type="text" id="username" placeholder="Tên tài khoản"></div>
-            <div class="input-group"><input type="password" id="password" placeholder="Mật khẩu"></div>
-            <button class="btn btn-primary" onclick="handleLogin()">BẮT ĐẦU</button>
-            <p style="margin-top: 20px; font-size: 13px;">Chưa có tài khoản? <a href="javascript:void(0)" onclick="toggleAuth(false)" style="color:var(--primary); font-weight:bold;">Đăng ký ngay</a></p>
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <span class="x-shape">X</span>
+                    <span class="o-shape">O</span>
+                </div>
+                <h1 class="logo-text">Caro <span>Battle</span></h1>
+            </div>
+
+            <h2 class="auth-subtitle">Đăng nhập để chiến đấu!</h2>
+            
+            <div class="input-group-modern">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Tên tài khoản của bạn">
+            </div>
+            
+            <div class="input-group-modern">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Mật khẩu">
+            </div>
+
+            <button class="btn btn-gradient" onclick="handleLogin()">
+                <span>VÀO GAME NGAY</span>
+                <i class="fas fa-sign-in-alt"></i>
+            </button>
+
+            <div class="auth-footer">
+                Chưa có tài khoản? <a href="javascript:void(0)" onclick="toggleAuth(false)">Đăng ký miễn phí</a>
+            </div>
         </div>
+
         <div class="auth-card hidden" id="form-reg">
-            <h2 style="color:var(--primary); margin-bottom:20px;">ĐĂNG KÝ</h2>
-            <div class="input-group"><input type="text" id="reg-user" placeholder="Tên tài khoản mới"></div>
-            <div class="input-group"><input type="password" id="reg-pass" placeholder="Mật khẩu mới"></div>
-            <button class="btn btn-primary" onclick="handleRegister()">TẠO TÀI KHOẢN</button>
-            <p style="margin-top: 20px; font-size: 13px;"><a href="javascript:void(0)" onclick="toggleAuth(true)">Quay lại đăng nhập</a></p>
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <span class="x-shape">X</span>
+                    <span class="o-shape">O</span>
+                </div>
+                <h1 class="logo-text">Caro <span>Battle</span></h1>
+            </div>
+
+            <h2 class="auth-subtitle">Đăng ký nhanh trong 3 giây</h2>
+
+            <div class="input-group-modern">
+                <i class="fas fa-user-plus"></i>
+                <input type="text" id="reg-user" placeholder="Nhập tên tài khoản mới">
+            </div>
+            
+            <div class="input-group-modern">
+                <i class="fas fa-key"></i>
+                <input type="password" id="reg-pass" placeholder="Nhập mật khẩu mới">
+            </div>
+
+            <button class="btn btn-gradient" onclick="handleRegister()">
+                <span>HOÀN TẤT ĐĂNG KÝ</span>
+                <i class="fas fa-check-circle"></i>
+            </button>
+
+            <div class="auth-footer">
+                Đã có tài khoản rồi? <a href="javascript:void(0)" onclick="toggleAuth(true)">Quay lại đăng nhập</a>
+            </div>
         </div>
+
     </div>
 
     <div id="page-lobby" class="hidden">
         <nav class="navbar">
-            <div style="font-weight:800; color:var(--primary); font-size:22px;">TRÒ CHƠI CARO</div>
+            <div style="font-weight:800; color:var(--primary); font-size:22px;">Caro Battle</div>
             <div style="font-size:14px; font-weight:600;">Chào, <span id="player-name"></span> 
                 <button class="btn btn-outline" style="color:red; margin-left:10px; padding:5px 10px;" onclick="handleLogout()">Thoát</button>
             </div>
@@ -35,9 +83,9 @@
         <div class="lobby-layout">
             <div class="card">
                 <h3><i class="fas fa-users" style="color:#3b82f6;"></i> Người chơi Online</h3>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-bottom:1px solid #f1f5f9; padding-bottom:15px;">
-                    <span><i class="fas fa-user-circle" style="color:#cbd5e1; font-size:20px;"></i> <b>Người chơi 1</b> <small style="color:green;">Online</small></span>
-                    <button class="btn btn-blue" style="font-size:12px;" onclick="openChallenge('Người chơi 1')">Thách đấu</button>
+                <div style="padding: 40px 0; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-coffee" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>Hiện chưa có ai online</p>
                 </div>
             </div>
             <div class="profile-col">
@@ -91,19 +139,62 @@
     </div>
 
     <script>
-        function toggleAuth(login) { document.getElementById('form-login').classList.toggle('hidden', !login); document.getElementById('form-reg').classList.toggle('hidden', login); document.querySelectorAll('input').forEach(i => i.value = ""); }
-        function handleRegister() { const u = document.getElementById('reg-user').value, p = document.getElementById('reg-pass').value; if(!u || !p) return alert("Vui lòng điền đủ!"); localStorage.setItem('reg_u', u); localStorage.setItem('reg_p', p); alert("Đăng ký thành công!"); toggleAuth(true); }
-        function handleLogin() { 
-            const u = document.getElementById('username').value, p = document.getElementById('password').value;
-            const savedU = localStorage.getItem('reg_u'), savedP = localStorage.getItem('reg_p');
-            if(u === savedU && p === savedP && u !== null) { localStorage.setItem('isLogged', u); showPage('page-lobby'); }
-            else alert("Tài khoản hoặc mật khẩu không đúng!");
+        // --- LOGIC XỬ LÝ ĐĂNG NHẬP / ĐĂNG KÝ ---
+        function toggleAuth(showLogin) { 
+            // Ẩn hiện form dựa trên tham số
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-reg');
+            
+            if (showLogin) {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+            }
+            
+            // Xóa nội dung input khi chuyển đổi
+            document.querySelectorAll('input').forEach(i => i.value = ""); 
         }
+
+        function handleRegister() { 
+            const u = document.getElementById('reg-user').value;
+            const p = document.getElementById('reg-pass').value; 
+            
+            if(!u || !p) return alert("Vui lòng điền đầy đủ Tên và Mật khẩu!"); 
+            
+            localStorage.setItem('reg_u', u); 
+            localStorage.setItem('reg_p', p); 
+            
+            alert("Đăng ký thành công! Hãy đăng nhập ngay."); 
+            toggleAuth(true); // Chuyển về trang đăng nhập
+        }
+
+        function handleLogin() { 
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const savedU = localStorage.getItem('reg_u');
+            const savedP = localStorage.getItem('reg_p');
+            
+            if (!savedU) {
+                alert("Tài khoản không tồn tại. Vui lòng chọn 'Đăng ký miễn phí' bên dưới!");
+                return;
+            }
+
+            if(u === savedU && p === savedP) { 
+                localStorage.setItem('isLogged', u); 
+                showPage('page-lobby'); 
+            } else {
+                alert("Tên tài khoản hoặc mật khẩu không đúng!");
+            }
+        }
+
         function handleLogout() { localStorage.removeItem('isLogged'); location.reload(); }
         function showPage(id) { document.querySelectorAll('body > div').forEach(p => p.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); const user = localStorage.getItem('isLogged'); if(user) { document.getElementById('player-name').innerText = user; document.getElementById('display-user').innerText = user; } }
         function openChallenge(n) { document.getElementById('opp-text').innerText = n; document.getElementById('modal-challenge').classList.remove('hidden'); }
         function closeModal() { document.getElementById('modal-challenge').classList.add('hidden'); }
         function startMatch() { closeModal(); document.getElementById('screen-loading').classList.remove('hidden'); let t = 3; let i = setInterval(() => { t--; document.getElementById('timer').innerText = t; if(t <= 0) { clearInterval(i); window.location.href = `game.html?opp=${document.getElementById('opp-text').innerText}`; } }, 1000); }
+        
         window.onload = () => { if(localStorage.getItem('isLogged')) showPage('page-lobby'); else showPage('page-auth'); }
     </script>
 </body>
