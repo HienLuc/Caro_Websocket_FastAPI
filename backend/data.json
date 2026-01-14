@@ -1,0 +1,11 @@
+{
+    "users": [
+        {
+            "username": "string",
+            "password": "string",
+            "win_count": 0,
+            "loss_count": 0
+        }
+    ],
+    "history": []
+}
