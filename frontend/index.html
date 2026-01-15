@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Caro Battle - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="page-auth" class="auth-container">
+        
+        <div class="auth-card" id="form-login">
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <span class="x-shape">X</span>
+                    <span class="o-shape">O</span>
+                </div>
+                <h1 class="logo-text">Caro <span>Battle</span></h1>
+            </div>
+
+            <h2 class="auth-subtitle">Đăng nhập để chiến đấu!</h2>
+            
+            <div class="input-group-modern">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Tên tài khoản của bạn">
+            </div>
+            
+            <div class="input-group-modern">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Mật khẩu">
+            </div>
+
+            <button class="btn btn-gradient" onclick="handleLogin()">
+                <span>VÀO GAME NGAY</span>
+                <i class="fas fa-sign-in-alt"></i>
+            </button>
+
+            <div class="auth-footer">
+                Chưa có tài khoản? <a href="javascript:void(0)" onclick="toggleAuth(false)">Đăng ký miễn phí</a>
+            </div>
+        </div>
+
+        <div class="auth-card hidden" id="form-reg">
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <span class="x-shape">X</span>
+                    <span class="o-shape">O</span>
+                </div>
+                <h1 class="logo-text">Caro <span>Battle</span></h1>
+            </div>
+
+            <h2 class="auth-subtitle">Đăng ký nhanh trong 3 giây</h2>
+
+            <div class="input-group-modern">
+                <i class="fas fa-user-plus"></i>
+                <input type="text" id="reg-user" placeholder="Nhập tên tài khoản mới">
+            </div>
+            
+            <div class="input-group-modern">
+                <i class="fas fa-key"></i>
+                <input type="password" id="reg-pass" placeholder="Nhập mật khẩu mới">
+            </div>
+
+            <button class="btn btn-gradient" onclick="handleRegister()">
+                <span>HOÀN TẤT ĐĂNG KÝ</span>
+                <i class="fas fa-check-circle"></i>
+            </button>
+
+            <div class="auth-footer">
+                Đã có tài khoản rồi? <a href="javascript:void(0)" onclick="toggleAuth(true)">Quay lại đăng nhập</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="page-lobby" class="hidden">
+        <nav class="navbar">
+            <div style="font-weight:800; color:var(--primary); font-size:22px;">Caro Battle</div>
+            <div style="font-size:14px; font-weight:600;">Chào, <span id="player-name"></span> 
+                <button class="btn btn-outline" style="color:red; margin-left:10px; padding:5px 10px;" onclick="handleLogout()">Thoát</button>
+            </div>
+        </nav>
+        <div class="lobby-layout">
+            <div class="card">
+                <h3><i class="fas fa-users" style="color:#3b82f6;"></i> Người chơi Online</h3>
+                <div style="padding: 40px 0; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-coffee" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>Hiện chưa có ai online</p>
+                </div>
+            </div>
+            <div class="profile-col">
+                <div class="card" style="text-align: center; padding: 30px;">
+                    <div style="width:80px; height:80px; background:#e2e8f0; border-radius:50%; margin:0 auto 10px; display:flex; justify-content:center; align-items:center; font-size:30px; color:#94a3b8;"><i class="fas fa-user"></i></div>
+                    <h3 id="display-user"></h3>
+                    <p style="font-size:12px; color:green; font-weight:600;">Đang online</p>
+                </div>
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><i class="fas fa-history" style="color:#64748b;"></i><b> Lịch sử đấu</b></div>
+                    <button class="btn btn-outline" onclick="showPage('page-history')">Xem chi tiết</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-history" class="hidden" style="padding: 40px 10%;">
+        <div class="card">
+            <div style="display:flex; align-items:center; margin-bottom:25px;">
+                <button class="btn btn-outline" style="margin-right:20px;" onclick="showPage('page-lobby')"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                <h2 style="font-size: 20px;">Lịch sử Trận đấu</h2>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item"><b>0</b><span>Tổng trận</span></div>
+                <div class="stat-item"><b>0</b><span>Thắng</span></div>
+                <div class="stat-item"><b>0</b><span>Thua</span></div>
+                <div class="stat-item"><b>0%</b><span>Tỷ lệ thắng</span></div>
+            </div>
+            <div class="empty-state">
+                <i class="fas fa-gamepad"></i>
+                <p>Chưa có lịch sử trận đấu</p>
+                <small>Hãy bắt đầu thách đấu với người chơi khác!</small>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-challenge" class="modal-overlay hidden">
+        <div class="confirm-modal">
+            <p>Người dùng <b id="opp-text"></b> thách đấu với bạn!</p>
+            <div style="display:flex; align-items:center; justify-content:center; gap:35px; margin:25px 0;">
+                <div style="width:60px; height:60px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:25px; color:#cbd5e1;"><i class="fas fa-user"></i></div>
+                <div style="font-weight:900; color:#cbd5e1; font-size:24px;">VS</div>
+                <div style="width:60px; height:60px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:25px; color:#cbd5e1;"><i class="fas fa-user"></i></div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content: center;"><button class="btn btn-primary" style="background:#2ecc71; width:auto;" onclick="startMatch()">CHẤP NHẬN</button><button class="btn btn-red-solid" style="background:#ef4444;" onclick="closeModal()">TỪ CHỐI</button></div>
+        </div>
+    </div>
+
+    <div id="screen-loading" class="loading-screen modal-overlay hidden" style="background: var(--bg-light); z-index:9999;">
+        <div style="text-align:center;"><div style="font-weight:800; font-size:18px;">Đang tạo phòng đấu...</div><div id="timer" style="font-size:100px; font-weight:900; color:#ef4444; margin:20px 0;">3</div></div>
+    </div>
+
+    <script>
+        // --- LOGIC XỬ LÝ ĐĂNG NHẬP / ĐĂNG KÝ ---
+        function toggleAuth(showLogin) { 
+            // Ẩn hiện form dựa trên tham số
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-reg');
+            
+            if (showLogin) {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+            }
+            
+            // Xóa nội dung input khi chuyển đổi
+            document.querySelectorAll('input').forEach(i => i.value = ""); 
+        }
+
+        function handleRegister() { 
+            const u = document.getElementById('reg-user').value;
+            const p = document.getElementById('reg-pass').value; 
+            
+            if(!u || !p) return alert("Vui lòng điền đầy đủ Tên và Mật khẩu!"); 
+            
+            localStorage.setItem('reg_u', u); 
+            localStorage.setItem('reg_p', p); 
+            
+            alert("Đăng ký thành công! Hãy đăng nhập ngay."); 
+            toggleAuth(true); // Chuyển về trang đăng nhập
+        }
+
+        function handleLogin() { 
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const savedU = localStorage.getItem('reg_u');
+            const savedP = localStorage.getItem('reg_p');
+            
+            if (!savedU) {
+                alert("Tài khoản không tồn tại. Vui lòng chọn 'Đăng ký miễn phí' bên dưới!");
+                return;
+            }
+
+            if(u === savedU && p === savedP) { 
+                localStorage.setItem('isLogged', u); 
+                showPage('page-lobby'); 
+            } else {
+                alert("Tên tài khoản hoặc mật khẩu không đúng!");
+            }
+        }
+
+        function handleLogout() { localStorage.removeItem('isLogged'); location.reload(); }
+        function showPage(id) { document.querySelectorAll('body > div').forEach(p => p.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); const user = localStorage.getItem('isLogged'); if(user) { document.getElementById('player-name').innerText = user; document.getElementById('display-user').innerText = user; } }
+        function openChallenge(n) { document.getElementById('opp-text').innerText = n; document.getElementById('modal-challenge').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal-challenge').classList.add('hidden'); }
+        function startMatch() { closeModal(); document.getElementById('screen-loading').classList.remove('hidden'); let t = 3; let i = setInterval(() => { t--; document.getElementById('timer').innerText = t; if(t <= 0) { clearInterval(i); window.location.href = `game.html?opp=${document.getElementById('opp-text').innerText}`; } }, 1000); }
+        
+        window.onload = () => { if(localStorage.getItem('isLogged')) showPage('page-lobby'); else showPage('page-auth'); }
+    </script>
+</body>
+</html>
