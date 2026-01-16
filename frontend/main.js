@@ -1,14 +1,16 @@
-<<<<<<< HEAD
 // main.js - Logic xử lý sự kiện UI và tương tác với game
 
-import { connectSocket, sendMove, sendChatMessage, disconnectSocket } from "./socket_client.js";
+// QUAN TRỌNG: Import thêm sendCustomPacket để gửi lệnh xin chơi lại
+import { connectSocket, sendMove, sendChatMessage, disconnectSocket, sendSurrender, sendCustomPacket } from "./socket_client.js";
 
 // ================== CONFIG ==================
 const BOARD_SIZE = 15;
-let currentTurn = "X"; // Lượt hiện tại
-let myPlayer = null; // "X" hoặc "O" - được server gán
-let gameActive = true; // Trạng thái game
+let currentTurn = "X"; 
+let myPlayer = null;    // Role: "X" hoặc "O"
+let myUsername = null;  // Tên đăng nhập (Lấy từ localStorage)
+let gameActive = true; 
 let board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
+let opponentName = "Đối thủ";
 
 // ================== DOM ELEMENTS ==================
 const grid = document.getElementById("grid");
@@ -27,84 +29,82 @@ function initBoard() {
             cell.className = "cell";
             cell.dataset.row = row;
             cell.dataset.col = col;
-            
-            // Xử lý click vào ô
             cell.addEventListener("click", () => handleCellClick(row, col, cell));
-            
             grid.appendChild(cell);
         }
     }
-    
     console.log("✅ Board initialized");
 }
 
 // ================== HANDLE CELL CLICK ==================
 function handleCellClick(row, col, cellElement) {
-    // Kiểm tra điều kiện hợp lệ
-    if (!gameActive) {
-        addChatMessage("Hệ thống", "Trận đấu đã kết thúc!", "system");
-        return;
-    }
-    
-    if (board[row][col] !== 0) {
-        addChatMessage("Hệ thống", "Ô này đã có quân rồi!", "system");
-        return;
-    }
+    if (!gameActive) return;
+    if (board[row][col] !== 0) return;
     
     if (myPlayer !== currentTurn) {
         addChatMessage("Hệ thống", "Chưa tới lượt của bạn!", "system");
         return;
     }
     
-    // Gửi nước đi lên server
     sendMove(col, row, currentTurn);
 }
 
-// ================== UPDATE BOARD ==================
+// ================== UPDATE BOARD UI ==================
 function updateBoard(x, y, player) {
-    // Tìm cell tương ứng
     const cellIndex = y * BOARD_SIZE + x;
     const cell = grid.children[cellIndex];
+    if (!cell) return;
     
-    if (!cell) {
-        console.error(`Cell not found at (${x}, ${y})`);
-        return;
+    cell.innerText = player;
+    cell.classList.add("taken");
+    
+    if (player === "X") {
+        cell.classList.add("cell-x");
+        cell.style.color = "#e74c3c"; 
+    } else {
+        cell.classList.add("cell-o");
+        cell.style.color = "#3498db"; 
     }
     
-    // Cập nhật UI
-    cell.innerText = player;
-    cell.style.color = (player === "X") ? "red" : "blue";
-    cell.style.fontWeight = "900";
-    
-    // Cập nhật state
     board[y][x] = (player === "X") ? 1 : 2;
-    
-    console.log(`✅ Board updated: (${x}, ${y}) = ${player}`);
 }
 
 // ================== UPDATE TURN DISPLAY ==================
 function updateTurnDisplay(turn) {
     currentTurn = turn;
-    turnDisplay.innerText = turn;
-    turnDisplay.style.color = (turn === "X") ? "red" : "blue";
-    
-    // Thông báo lượt
-    if (turn === myPlayer) {
-        addChatMessage("Hệ thống", "Đến lượt của bạn!", "system");
-    } else {
-        addChatMessage("Hệ thống", "Đối thủ đang suy nghĩ...", "system");
+    if (turnDisplay) {
+        turnDisplay.innerText = turn;
+        turnDisplay.style.color = (turn === "X") ? "#e74c3c" : "#3498db";
+    }
+
+    const statusBox = document.getElementById("status-box");
+    if (statusBox) {
+        if (turn === myPlayer) {
+            statusBox.style.border = "2px solid #2ecc71";
+            document.body.style.cursor = "pointer";
+        } else {
+            statusBox.style.border = "1px solid #ddd";
+            document.body.style.cursor = "default";
+        }
     }
 }
 
-// ================== CHAT FUNCTIONS ==================
+// ================== CHAT FUNCTIONS (ĐÃ SỬA LỖI TÊN) ==================
 function addChatMessage(sender, message, type = "normal") {
     const messageDiv = document.createElement("div");
     messageDiv.style.marginBottom = "5px";
+    messageDiv.style.fontSize = "14px";
     
     if (type === "system") {
-        messageDiv.innerHTML = `<i style="color:green;">[${sender}]: ${message}</i>`;
+        messageDiv.innerHTML = `<i style="color:#2ecc71; font-size: 13px;">--- ${message} ---</i>`;
     } else {
-        messageDiv.innerHTML = `<b>${sender}:</b> ${message}`;
+        // FIX: So sánh tên người gửi với tên đăng nhập của mình
+        // Nếu tên người gửi trùng với myUsername -> Là "Bạn"
+        const isMe = (sender === myUsername);
+        const displayName = isMe ? "Bạn" : sender;
+        const color = isMe ? "#3498db" : "#e74c3c"; // Xanh: Mình, Đỏ: Địch
+        
+        messageDiv.innerHTML = `<strong style="color:${color}">${displayName}:</strong> ${message}`;
     }
     
     chatBox.appendChild(messageDiv);
@@ -115,95 +115,145 @@ window.sendMessage = function() {
     const message = chatInput.value.trim();
     if (message === "") return;
     
-    sendChatMessage(message);
-    addChatMessage("Bạn", message);
+    // FIX: Truyền thêm myUsername vào tham số thứ 2
+    sendChatMessage(message, myUsername); 
+    
     chatInput.value = "";
 };
 
-// Enter để gửi chat
 chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        window.sendMessage();
-    }
+    if (e.key === "Enter") window.sendMessage();
 });
 
 // ================== HANDLE SERVER MESSAGES ==================
 function handleServerMessage(data) {
+    console.log("📩 Main received:", data);
+
     switch (data.type) {
         case "player_assigned":
-            // Server gán vai trò X hoặc O cho người chơi
             myPlayer = data.player;
-            console.log(`🎮 You are Player: ${myPlayer}`);
-            addChatMessage("Hệ thống", `Bạn là người chơi ${myPlayer}`, "system");
+            const roleText = (myPlayer === "Spectator") ? "Khán giả" : myPlayer;
+            addChatMessage("Hệ thống", `Bạn đã tham gia với vai trò: <b>${roleText}</b>`, "system");
+            
+            const myInfo = document.getElementById("my-info");
+            if(myInfo) myInfo.innerText = `Bạn (${myPlayer})`;
+            break;
+
+        case "sync_board":
+            if (data.data) {
+                data.data.forEach(move => {
+                    updateBoard(move.x, move.y, move.player);
+                });
+            }
+            updateTurnDisplay(data.current_turn);
             break;
             
         case "update_board":
-            // Server gửi cập nhật bàn cờ
             const { x, y, player, next_turn } = data.data;
             updateBoard(x, y, player);
             updateTurnDisplay(next_turn);
             break;
             
+        case "opponent_left":
+            addChatMessage("Hệ thống", "Đối thủ đã thoát game!", "system");
+            gameActive = false;
+            showGameResult(myPlayer, "opponent_left");
+            break;
+
         case "game_over":
-            // Kết thúc game
             gameActive = false;
             const winner = data.winner;
-            updateBoard(data.data.x, data.data.y, winner);
+            const reason = data.reason || "normal"; 
+            
+            if (data.data) {
+                updateBoard(data.data.x, data.data.y, winner);
+            }
             
             setTimeout(() => {
-                showGameResult(winner);
+                showGameResult(winner, reason);
             }, 500);
             break;
             
-        case "chat_message":
-            // Nhận tin nhắn chat từ đối thủ
-            addChatMessage("Đối thủ", data.content);
+        case "chat":
+            // Server gửi về {sender: "Hien", message: "..."}
+            // Hàm addChatMessage sẽ tự lo việc so sánh tên để hiển thị "Bạn" hay tên đối thủ
+            addChatMessage(data.sender, data.message);
             break;
-            
-        case "notification":
-            // Thông báo từ server
-            addChatMessage("Hệ thống", data.message, "system");
+
+        // --- (MỚI) NHẬN YÊU CẦU CHƠI LẠI ---
+        case "restart_request":
+            // Nếu người gửi yêu cầu KHÔNG phải là mình -> Hiện popup xác nhận
+            if (data.from !== myUsername) {
+                window.confirmAction('restart_accept');
+            }
             break;
-            
-        case "error":
-            // Lỗi từ server
-            addChatMessage("Hệ thống", data.message || "Có lỗi xảy ra!", "system");
+
+        // --- (MỚI) RESET GAME ---
+        case "reset_game":
+            resetGameUI();
             break;
-            
-        default:
-            console.warn("Unknown message type:", data);
     }
+}
+
+// ================== LOGIC RESET GAME ==================
+function resetGameUI() {
+    initBoard(); // Xóa trắng bàn cờ
+    gameActive = true;
+    currentTurn = "X";
+    updateTurnDisplay("X");
+    
+    // Ẩn tất cả popup
+    document.getElementById("modal-result").classList.add("hidden");
+    document.getElementById("modal-confirm").classList.add("hidden");
+    
+    addChatMessage("Hệ thống", "Ván đấu mới bắt đầu!", "system");
 }
 
 // ================== SHOW GAME RESULT ==================
-function showGameResult(winner) {
+function showGameResult(winner, reason) {
     const modal = document.getElementById("modal-result");
-    const winnerName = document.getElementById("winner-name");
-    const winnerTag = document.getElementById("winner-tag");
+    const winnerNameEl = document.getElementById("winner-name");
     
-    if (winner === myPlayer) {
-        winnerName.innerText = "BẠN";
-        winnerTag.innerText = "BẠN";
-        
-        // Đổi vị trí win/lose
-        const boxes = document.querySelectorAll(".res-box");
-        boxes[0].className = "res-box res-win";
-        boxes[0].querySelector("span:last-child").innerText = "THẮNG CUỘC";
-        boxes[0].querySelector("span:last-child").style.color = "#2ecc71";
-        
-        boxes[1].className = "res-box res-lose";
-        boxes[1].querySelector("span:last-child").innerText = "THUA CUỘC";
-        boxes[1].querySelector("span:last-child").style.color = "#ef4444";
+    const boxes = document.querySelectorAll(".res-box");
+    const leftBox = boxes[0];  // BẠN
+    const rightBox = boxes[1]; // ĐỐI THỦ
+
+    const isWin = (winner === myPlayer);
+
+    // Cấu hình Box Trái (BẠN)
+    const leftText = leftBox.querySelector("span:last-child"); 
+    if (isWin) {
+        leftBox.className = "res-box res-win";
+        leftText.innerText = "THẮNG CUỘC";
     } else {
-        const oppName = document.getElementById("opp-name").innerText;
-        winnerName.innerText = oppName;
-        winnerTag.innerText = oppName;
+        leftBox.className = "res-box res-lose";
+        leftText.innerText = "THUA CUỘC";
+    }
+
+    // Cấu hình Box Phải (ĐỐI THỦ)
+    const rightText = rightBox.querySelector("span:last-child");
+    if (!isWin) {
+        rightBox.className = "res-box res-win";
+        rightText.innerText = "THẮNG CUỘC";
+    } else {
+        rightBox.className = "res-box res-lose";
+        rightText.innerText = "THUA CUỘC";
+    }
+
+    let resultText = "";
+    if (reason === "surrender") {
+        resultText = isWin ? "ĐỐI THỦ ĐẦU HÀNG" : "BẠN ĐẦU HÀNG";
+    } else if (reason === "opponent_left") {
+        resultText = "ĐỐI THỦ ĐÃ THOÁT";
+    } else {
+        resultText = isWin ? "BẠN THẮNG" : `${opponentName} THẮNG`;
     }
     
+    winnerNameEl.innerText = resultText;
     modal.classList.remove("hidden");
 }
 
-// ================== GAME CONTROLS ==================
+// ================== MODAL CONFIRM (XỬ LÝ NÚT BẤM) ==================
 window.confirmAction = function(type) {
     const modal = document.getElementById("modal-confirm");
     const icon = document.getElementById("confirm-icon");
@@ -213,15 +263,22 @@ window.confirmAction = function(type) {
     window.pendingAction = type;
     
     if (type === "surrender") {
+        if (!gameActive) return;
         icon.className = "fas fa-flag";
         icon.style.color = "#ef4444";
         title.innerText = "Đầu Hàng";
-        desc.innerText = "Bạn có chắc muốn Đầu Hàng? Đối thủ sẽ thắng cuộc.";
+        desc.innerText = "Bạn có chắc muốn đầu hàng? Đối thủ sẽ thắng ngay lập tức.";
     } else if (type === "exit") {
         icon.className = "fas fa-sign-out-alt";
         icon.style.color = "#64748b";
         title.innerText = "Rời Phòng";
-        desc.innerText = "Bạn có chắc muốn rời trận đấu và quay về sảnh chính?";
+        desc.innerText = "Bạn có chắc muốn rời trận đấu?";
+    } else if (type === "restart_accept") {
+        // Modal khi nhận lời mời chơi lại từ đối thủ
+        icon.className = "fas fa-sync-alt";
+        icon.style.color = "#3b82f6";
+        title.innerText = "Yêu Cầu Chơi Lại";
+        desc.innerText = "Đối thủ muốn chơi ván mới. Bạn có đồng ý không?";
     }
     
     modal.classList.remove("hidden");
@@ -229,156 +286,67 @@ window.confirmAction = function(type) {
 
 window.closeConfirm = function() {
     document.getElementById("modal-confirm").classList.add("hidden");
+    window.pendingAction = null;
 };
 
 window.executeConfirm = function() {
     if (window.pendingAction === "surrender") {
-        gameActive = false;
-        disconnectSocket();
-        
-        // Hiển thị kết quả thua
-        const oppName = document.getElementById("opp-name").innerText;
-        document.getElementById("winner-name").innerText = oppName;
-        document.getElementById("modal-result").classList.remove("hidden");
+        sendSurrender();
     } else if (window.pendingAction === "exit") {
         disconnectSocket();
         window.location.href = "index.html";
+    } else if (window.pendingAction === "restart_accept") {
+        // Gửi xác nhận đồng ý chơi lại
+        if (typeof sendCustomPacket === 'function') {
+            sendCustomPacket({ action: "confirm_restart" });
+        } else {
+            console.error("Thiếu hàm sendCustomPacket trong socket_client.js");
+        }
     }
-    
     window.closeConfirm();
 };
 
+// Sửa lại hàm này: Thay vì reload trang thì gửi yêu cầu restart
 window.handleReplay = function() {
-    if (confirm("Làm mới bàn cờ và chơi lại?")) {
-        gameActive = true;
-        currentTurn = "X";
-        initBoard();
-        updateTurnDisplay("X");
-        addChatMessage("Hệ thống", "Trận đấu mới bắt đầu!", "system");
+    if (confirm("Gửi yêu cầu chơi ván mới tới đối thủ?")) {
+        // Gửi yêu cầu lên server
+        if (typeof sendCustomPacket === 'function') {
+            sendCustomPacket({ action: "request_restart" });
+            addChatMessage("Hệ thống", "Đã gửi yêu cầu chơi lại...", "system");
+        } else {
+            alert("Vui lòng cập nhật file socket_client.js để dùng tính năng này!");
+        }
     }
 };
 
-// ================== START GAME ==================
+// ================== STARTUP ==================
 window.onload = function() {
-    // Lấy thông tin phòng từ URL
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("room") || "default-room";
-    const oppName = params.get("opp") || "Đối thủ";
+    const roomId = params.get("room");
     
-    // Cập nhật tên đối thủ
-    if (oppName !== "Đối thủ") {
-        document.getElementById("opp-name").innerText = oppName + " (X)";
-    }
+    // 1. Lấy tên người dùng từ LocalStorage (để so sánh chat chính xác)
+    myUsername = localStorage.getItem('isLogged'); 
     
-    // Khởi tạo bàn cờ
+    const oppNameParam = params.get("opp");
+    if (oppNameParam) opponentName = oppNameParam;
+
+    const roomDisplay = document.getElementById("room-display");
+    if(roomDisplay) roomDisplay.innerText = roomId || "Phòng Ngẫu Nhiên";
+    
+    const oppNameEl = document.getElementById("opp-name");
+    if(oppNameEl) oppNameEl.innerText = opponentName;
+
     initBoard();
     
-    // Kết nối WebSocket
-    connectSocket(roomId, handleServerMessage);
-    
-    addChatMessage("Hệ thống", "Đang kết nối tới server...", "system");
+    if (roomId) {
+        connectSocket(roomId, handleServerMessage);
+        addChatMessage("Hệ thống", "Đang kết nối tới máy chủ...", "system");
+    } else {
+        alert("Không tìm thấy mã phòng! Quay lại sảnh.");
+        window.location.href = "index.html";
+    }
 };
 
-// Xử lý khi đóng tab/thoát trang
 window.onbeforeunload = function() {
     disconnectSocket();
 };
-=======
-// main.js
-import { connectSocket, sendMove } from "./socket_client.js";
-
-const canvas = document.getElementById("board");
-const ctx = canvas.getContext("2d");
-
-// ================== CONFIG ==================
-const BOARD_SIZE = 15;
-const CELL_SIZE = 40;
-
-canvas.width = BOARD_SIZE * CELL_SIZE;
-canvas.height = BOARD_SIZE * CELL_SIZE;
-
-// ================== STATE ==================
-let board = Array.from({ length: BOARD_SIZE }, () =>
-    Array(BOARD_SIZE).fill(null)
-);
-
-// ================== DRAW ==================
-function drawBoard() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw grid
-    for (let i = 0; i <= BOARD_SIZE; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * CELL_SIZE, 0);
-        ctx.lineTo(i * CELL_SIZE, canvas.height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, i * CELL_SIZE);
-        ctx.lineTo(canvas.width, i * CELL_SIZE);
-        ctx.stroke();
-    }
-
-    // Draw pieces
-    for (let y = 0; y < BOARD_SIZE; y++) {
-        for (let x = 0; x < BOARD_SIZE; x++) {
-            if (board[y][x]) {
-                drawPiece(x, y, board[y][x]);
-            }
-        }
-    }
-}
-
-function drawPiece(x, y, value) {
-    ctx.font = "28px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-        value === "X" ? "❌" : "⭕",
-        x * CELL_SIZE + CELL_SIZE / 2,
-        y * CELL_SIZE + CELL_SIZE / 2
-    );
-}
-
-// ================== EVENT ==================
-canvas.addEventListener("click", (event) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((event.clientX - rect.left) / CELL_SIZE);
-    const y = Math.floor((event.clientY - rect.top) / CELL_SIZE);
-
-    // FE không tự xử lý logic
-    sendMove(x, y);
-});
-
-// ================== SOCKET HANDLER ==================
-function handleServerMessage(data) {
-    switch (data.type) {
-        case "init":
-            // Server gửi trạng thái ban đầu
-            board = data.board;
-            drawBoard();
-            break;
-
-        case "update":
-            // Server gửi board mới
-            board = data.board;
-            drawBoard();
-            break;
-
-        case "win":
-            alert(`🎉 Player ${data.winner} wins!`);
-            break;
-
-        case "error":
-            alert(`❌ ${data.message}`);
-            break;
-
-        default:
-            console.warn("Unknown message type:", data);
-    }
-}
-
-// ================== START ==================
-connectSocket(handleServerMessage);
-drawBoard();
->>>>>>> 321244fbea4627dbd73fa80b5de32fbd3e969501

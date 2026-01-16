@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 // socket_client.js - Kết nối WebSocket và xử lý giao tiếp với Server
 
 let socket = null;
-let currentPlayer = null; // "X" hoặc "O"
 let roomId = null;
 
 /**
@@ -13,34 +11,38 @@ let roomId = null;
 export function connectSocket(room, onMessageCallback) {
     roomId = room;
     
-    // Địa chỉ WebSocket server (thay đổi nếu deploy)
+    // Địa chỉ WebSocket server
+    // Lưu ý: Nếu chạy trên máy thật (LAN) thì đổi localhost thành IP máy (VD: 192.168.1.x)
     const wsUrl = `ws://localhost:8000/ws/${roomId}`;
     
+    console.log(`🔌 Connecting to: ${wsUrl}`);
     socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
         console.log(`✅ WebSocket connected to room: ${roomId}`);
         
-        // Gửi thông báo tham gia phòng
+        // Gửi thông báo tham gia phòng để Server biết và gán X/O
         const username = localStorage.getItem('isLogged') || 'Guest';
         socket.send(JSON.stringify({
             action: "join",
-            data: { username }
+            data: { username: username }
         }));
     };
 
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            console.log("📨 Received from server:", data);
             onMessageCallback(data);
         } catch (err) {
             console.error("❌ Invalid message format:", event.data, err);
         }
     };
 
-    socket.onclose = () => {
-        console.log("❌ WebSocket disconnected");
+    socket.onclose = (event) => {
+        console.log("❌ WebSocket disconnected", event);
+        if (event.code !== 1000) {
+            console.warn("⚠️ Kết nối bị ngắt bất thường.");
+        }
     };
 
     socket.onerror = (error) => {
@@ -57,7 +59,6 @@ export function connectSocket(room, onMessageCallback) {
 export function sendMove(x, y, player) {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
         console.warn("⚠️ WebSocket not ready");
-        alert("Chưa kết nối tới server!");
         return;
     }
 
@@ -71,10 +72,11 @@ export function sendMove(x, y, player) {
 }
 
 /**
- * Gửi tin nhắn chat
+ * Gửi tin nhắn chat (ĐÃ SỬA: Thêm tham số sender)
  * @param {string} message - Nội dung tin nhắn
+ * @param {string} sender - Tên người gửi (Username)
  */
-export function sendChatMessage(message) {
+export function sendChatMessage(message, sender) {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
         console.warn("⚠️ WebSocket not ready");
         return;
@@ -82,8 +84,35 @@ export function sendChatMessage(message) {
 
     socket.send(JSON.stringify({
         action: "chat",
-        message: message
+        message: message,
+        sender: sender // <--- QUAN TRỌNG: Gửi kèm tên để server biết ai nhắn
     }));
+}
+
+/**
+ * Gửi lệnh đầu hàng
+ */
+export function sendSurrender() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        console.warn("⚠️ WebSocket not ready");
+        return;
+    }
+
+    socket.send(JSON.stringify({
+        action: "resign"
+    }));
+    console.log("🏳️ Sent surrender request");
+}
+
+/**
+ * Gửi lệnh tùy chỉnh (Dùng cho Restart Game)
+ */
+export function sendCustomPacket(data) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(data));
+    } else {
+        console.warn("⚠️ Socket not ready for custom packet");
+    }
 }
 
 /**
@@ -102,55 +131,3 @@ export function disconnectSocket() {
 export function isConnected() {
     return socket && socket.readyState === WebSocket.OPEN;
 }
-=======
-// socket_client.js
-
-let socket = null;
-
-/**
- * Kết nối WebSocket tới server
- * @param {Function} onMessageCallback - hàm xử lý message từ server
- */
-export function connectSocket(onMessageCallback) {
-    socket = new WebSocket("ws://localhost:8000/ws/caro");
-
-    socket.onopen = () => {
-        console.log("✅ WebSocket connected");
-    };
-
-    socket.onmessage = (event) => {
-        try {
-            const data = JSON.parse(event.data);
-            onMessageCallback(data);
-        } catch (err) {
-            console.error("Invalid message format:", event.data);
-        }
-    };
-
-    socket.onclose = () => {
-        console.log("❌ WebSocket disconnected");
-    };
-
-    socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-    };
-}
-
-/**
- * Gửi nước đi lên server
- * @param {number} x
- * @param {number} y
- */
-export function sendMove(x, y) {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.warn("WebSocket not ready");
-        return;
-    }
-
-    socket.send(JSON.stringify({
-        type: "move",
-        x: x,
-        y: y
-    }));
-}
->>>>>>> 321244fbea4627dbd73fa80b5de32fbd3e969501
