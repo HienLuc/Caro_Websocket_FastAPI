@@ -17,10 +17,7 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-light);
     color: var(--text);
-    
-    /* --- FIX: BỎ CĂN GIỮA Ở BODY ĐỂ TRÁNH VỠ SẢNH CHỜ --- */
     min-height: 100vh;
-    /* display: flex; -> Đã bỏ dòng này */
 }
 
 /* ======================
@@ -29,7 +26,7 @@ body {
 .auth-container {
     display: flex; justify-content: center; align-items: center;
     width: 100%;
-    min-height: 100vh; /* Căn giữa màn hình cho trang login */
+    min-height: 100vh;
 }
 
 .logo-wrapper { margin-bottom: 30px; text-align: center; }
@@ -132,8 +129,6 @@ body {
     grid-template-columns: repeat(15, 32px);
     grid-template-rows: repeat(15, 32px);
     background-color: #cbd5e1; gap: 1px; border: 1px solid #cbd5e1;
-    
-    /* Căn giữa bàn cờ */
     margin: 0 auto;
 }
 
@@ -169,14 +164,10 @@ body {
 }
 
 /* --- MÀU THẮNG / THUA --- */
-.res-win {
-    background: #f0fdf4; border-color: #2ecc71; color: #166534;
-}
+.res-win { background: #f0fdf4; border-color: #2ecc71; color: #166534; }
 .res-win span:last-child { color: #16a34a; font-weight: 900; }
 
-.res-lose {
-    background: #fef2f2; border-color: #ef4444; color: #991b1b;
-}
+.res-lose { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
 .res-lose span:last-child { color: #dc2626; font-weight: 900; }
 
 .res-name {
@@ -214,8 +205,81 @@ body {
 
 .hidden { display: none !important; }
 
-/* Thêm css cho danh sách online */
 .online-user-item {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px; border-bottom: 1px solid #eee;
+}
+
+/* ========================
+   8. MODAL LỊCH SỬ (Sudoku Style)
+   ======================== */
+.history-modal-content {
+    background: #f8fafc;
+    width: 700px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    font-family: 'Inter', sans-serif;
+    margin: auto; position: relative;
+}
+
+.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.history-header h2 { margin: 0; font-size: 20px; color: #1e293b; }
+
+.history-stats { display: flex; gap: 15px; margin-bottom: 25px; }
+.stat-box {
+    flex: 1; background: white; padding: 15px;
+    border-radius: 10px; text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+.stat-val { display: block; font-size: 24px; font-weight: 800; }
+.stat-label { font-size: 13px; color: #64748b; font-weight: 500; }
+
+.val-blue { color: #3b82f6; }
+.val-green { color: #2ecc71; }
+.val-red { color: #ef4444; }
+.val-purple { color: #8b5cf6; }
+
+.history-table-header {
+    display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr;
+    padding: 10px 15px; font-size: 13px; font-weight: 600; color: #64748b;
+    border-bottom: 2px solid #e2e8f0; margin-bottom: 10px;
+}
+
+.history-list { max-height: 300px; overflow-y: auto; }
+
+.history-item {
+    display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr;
+    padding: 15px; background: white; margin-bottom: 8px;
+    border-radius: 8px; align-items: center; font-size: 14px;
+    font-weight: 500; color: #334155;
+}
+.history-item:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+.tag { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.tag-win { background: #dcfce7; color: #166534; }
+.tag-lose { background: #fee2e2; color: #991b1b; }
+
+/* =================================
+   9. ĐỒNG HỒ ĐẾM NGƯỢC (TIMER STYLE)
+   ================================= */
+.timer-display {
+    font-size: 36px;
+    font-weight: 900;
+    color: #334155;
+    text-align: center;
+    margin: 5px 0;
+    font-variant-numeric: tabular-nums; /* Giúp số không bị nhảy khi đếm */
+}
+
+/* Hiệu ứng nhấp nháy đỏ khi còn < 5s */
+.timer-warning {
+    color: #ef4444 !important;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }

@@ -25,8 +25,11 @@
         <div class="game-sidebar">
             
             <div class="turn-card" id="status-box">
-                <div class="turn-label">LƯỢT ĐI HIỆN TẠI</div>
-                <div class="current-turn" id="turn" style="color: #e74c3c;">X</div>
+                <div class="turn-label">THỜI GIAN SUY NGHĨ</div>
+                <div class="timer-display" id="timer-display">30s</div>
+                <div style="margin-top:5px; font-size:13px; color:#64748b;">
+                    Lượt của: <span id="turn" style="font-weight:800;">X</span>
+                </div>
             </div>
 
             <div class="turn-card" style="display:flex; justify-content:space-around; align-items:center; padding: 15px;">
@@ -51,11 +54,7 @@
                 <div class="chat-header">
                     <i class="fas fa-comments mr-2"></i> Trò chuyện
                 </div>
-                <div id="chat-box" class="chat-box">
-                    <div style="text-align: center; color: #94a3b8; font-size: 13px; margin-top: 10px;">
-                        <i class="fas fa-circle-notch fa-spin"></i> Đang kết nối server...
-                    </div>
-                </div>
+                <div id="chat-box" class="chat-box"></div>
                 <div class="chat-input-area">
                     <input type="text" id="chat-input" class="chat-input" placeholder="Nhập tin nhắn...">
                     <button class="btn-send" onclick="window.sendMessage()">
@@ -65,14 +64,22 @@
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="btn btn-red-solid" style="width:100%" onclick="window.confirmAction('surrender')">
-                    <i class="fas fa-flag"></i> Đầu hàng
+                <button class="btn btn-outline" style="border-color:#f59e0b; color:#d97706;" onclick="window.confirmAction('draw')">
+                    <i class="fas fa-handshake"></i> Xin Hòa
                 </button>
+                <button class="btn btn-outline" style="border-color:#3b82f6; color:#2563eb;" onclick="window.confirmAction('undo')">
+                    <i class="fas fa-undo"></i> Đi Lại
+                </button>
+                
+                <button class="btn btn-red-solid" style="grid-column: span 2;" onclick="window.confirmAction('surrender')">
+                    <i class="fas fa-flag"></i> ĐẦU HÀNG
+                </button>
+
                 <button class="btn btn-outline" style="width:100%" onclick="window.handleReplay()">
-                    <i class="fas fa-redo"></i> F5
+                    <i class="fas fa-redo"></i> Chơi Lại
                 </button>
-                <button class="btn btn-outline" style="grid-column: span 2; color: #64748b;" onclick="window.confirmAction('exit')">
-                    <i class="fas fa-sign-out-alt"></i> Rời phòng
+                <button class="btn btn-outline" style="width:100%; color: #64748b;" onclick="window.confirmAction('exit')">
+                    <i class="fas fa-sign-out-alt"></i> Thoát
                 </button>
             </div>
         </div>
@@ -81,20 +88,19 @@
     <div id="modal-result" class="modal-overlay hidden">
         <div class="result-card">
             <h1 class="res-title">KẾT QUẢ TRẬN ĐẤU</h1>
+            <div id="winner-name" style="font-size:20px; font-weight:800; margin:20px 0;">...</div>
             
-            <p style="color:#64748b; font-size: 14px; font-weight: 600;">NGƯỜI CHIẾN THẮNG</p>
-            <div id="winner-name">...</div>
-
             <div class="res-flex">
                 <div class="res-box">
                     <div class="res-avatar"><i class="fas fa-user"></i></div>
                     <span class="res-name">BẠN</span>
-                    <span class="res-status">...</span> </div>
-
+                    <span class="res-status">...</span> 
+                </div>
                 <div class="res-box">
                     <div class="res-avatar"><i class="fas fa-user-secret"></i></div>
                     <span class="res-name">ĐỐI THỦ</span>
-                    <span class="res-status">...</span> </div>
+                    <span class="res-status">...</span> 
+                </div>
             </div>
 
             <div class="modal-actions">
@@ -110,13 +116,13 @@
 
     <div id="modal-confirm" class="modal-overlay hidden">
         <div class="confirm-modal">
-            <i id="confirm-icon" class="confirm-icon"></i>
-            <h3 id="confirm-title" class="confirm-title"></h3>
-            <p id="confirm-desc" class="confirm-desc"></p>
+            <i id="confirm-icon" class="confirm-icon" style="font-size:40px; margin-bottom:15px; display:block;"></i>
+            <h3 id="confirm-title" class="confirm-title" style="margin-bottom:10px; font-size:20px;"></h3>
+            <p id="confirm-desc" class="confirm-desc" style="color:#64748b; margin-bottom:25px;"></p>
             
-            <div class="modal-actions">
-                <button class="btn btn-danger" onclick="window.executeConfirm()">ĐỒNG Ý</button>
-                <button class="btn btn-cancel" onclick="window.closeConfirm()">HỦY BỎ</button>
+            <div class="modal-actions" style="display:flex; justify-content:center; gap:10px;">
+                <button class="btn btn-primary" style="width:auto;" onclick="window.executeConfirm()">ĐỒNG Ý</button>
+                <button class="btn btn-outline" style="width:auto;" onclick="window.closeConfirm()">HỦY BỎ</button>
             </div>
         </div>
     </div>

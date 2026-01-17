@@ -1,11 +1,11 @@
 ﻿import json
 import os
+from datetime import datetime
 
-# Tự động xác định đường dẫn đến file data.json cùng thư mục
+# Xác định đường dẫn file data.json
 DB_FILE = os.path.join(os.path.dirname(__file__), "data.json")
 
 def load_data():
-    """Đọc dữ liệu từ file JSON"""
     if not os.path.exists(DB_FILE):
         return {"users": [], "history": []}
     try:
@@ -15,18 +15,30 @@ def load_data():
         return {"users": [], "history": []}
 
 def save_data(data):
-    """Ghi dữ liệu vào file JSON"""
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def update_user_stats(username: str, is_winner: bool):
-    """Hàm bổ trợ để cập nhật thắng/thua cho user"""
+# --- HÀM LƯU LỊCH SỬ ---
+def record_match(player1, player2, winner):
     db = load_data()
-    for user in db["users"]:
-        if user["username"] == username:
-            if is_winner:
-                user["win_count"] += 1
-            else:
-                user["loss_count"] += 1
-            break
+    match_record = {
+        "id": len(db.get("history", [])) + 1,
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M"),
+        "player_x": player1,
+        "player_o": player2,
+        "winner": winner
+    }
+    if "history" not in db:
+        db["history"] = []
+    db["history"].insert(0, match_record)
     save_data(db)
+
+# --- HÀM LẤY LỊCH SỬ (QUAN TRỌNG) ---
+def get_user_history(username):
+    db = load_data()
+    history = db.get("history", [])
+    user_matches = [
+        m for m in history 
+        if m["player_x"] == username or m["player_o"] == username
+    ]
+    return user_matches

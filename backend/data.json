@@ -7,5 +7,69 @@
             "loss_count": 0
         }
     ],
-    "history": []
+    "history": [
+        {
+            "id": 9,
+            "timestamp": "17/01/2026 21:39",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 8,
+            "timestamp": "17/01/2026 21:32",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 7,
+            "timestamp": "17/01/2026 21:22",
+            "player_x": "Minh",
+            "player_o": "Hien",
+            "winner": "Hien"
+        },
+        {
+            "id": 6,
+            "timestamp": "17/01/2026 21:19",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 5,
+            "timestamp": "17/01/2026 21:15",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 4,
+            "timestamp": "17/01/2026 21:10",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 3,
+            "timestamp": "17/01/2026 21:09",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 2,
+            "timestamp": "17/01/2026 21:09",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 1,
+            "timestamp": "17/01/2026 20:40",
+            "player_x": "Minh2",
+            "player_o": "Minh",
+            "winner": "Minh2"
+        }
+    ]
 }

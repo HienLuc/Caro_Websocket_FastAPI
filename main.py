@@ -1,11 +1,15 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 from backend.connection_manager import ConnectionManager
 from backend.game_logic import GameLogic
 from typing import Dict, List
+import os
+import asyncio # Để chạy timer
+from backend.database import record_match, get_user_history
 
 app = FastAPI()
 manager = ConnectionManager()
-logic = GameLogic() # Instance logic dùng chung (vì class này stateless)
+logic = GameLogic()
 
 # ==========================================
 # 1. QUẢN LÝ SẢNH CHỜ (LOBBY)
@@ -13,19 +17,15 @@ logic = GameLogic() # Instance logic dùng chung (vì class này stateless)
 lobby_connections: Dict[str, WebSocket] = {}
 
 async def broadcast_lobby(message: dict):
-    """Gửi tin nhắn cho tất cả mọi người trong sảnh"""
     for connection in list(lobby_connections.values()):
-        try:
-            await connection.send_json(message)
-        except:
-            pass 
+        try: await connection.send_json(message)
+        except: pass 
 
 @app.websocket("/ws/lobby/{username}")
 async def lobby_endpoint(websocket: WebSocket, username: str):
     await websocket.accept()
     lobby_connections[username] = websocket
     
-    # Gửi danh sách online
     online_users = list(lobby_connections.keys())
     await broadcast_lobby({"type": "online_list", "users": online_users})
     
@@ -34,35 +34,72 @@ async def lobby_endpoint(websocket: WebSocket, username: str):
             data = await websocket.receive_json()
             action = data.get("action")
             
-            # --- XỬ LÝ THÁCH ĐẤU ---
             if action == "challenge_request":
                 target_user = data.get("target")
                 if target_user in lobby_connections:
                     await lobby_connections[target_user].send_json({
-                        "type": "challenge_received",
-                        "from": username
+                        "type": "challenge_received", "from": username
                     })
             
             elif action == "challenge_accept":
                 opponent = data.get("to")
                 room_id = f"{opponent}_VS_{username}"
-                
                 start_msg = {"type": "start_game", "room": room_id}
                 
                 if opponent in lobby_connections:
                     await lobby_connections[opponent].send_json(start_msg)
-                
                 await websocket.send_json(start_msg)
 
     except WebSocketDisconnect:
-        if username in lobby_connections:
-            del lobby_connections[username]
+        if username in lobby_connections: del lobby_connections[username]
         online_users = list(lobby_connections.keys())
         await broadcast_lobby({"type": "online_list", "users": online_users})
 
 
 # ==========================================
-# 2. QUẢN LÝ BÀN CỜ (GAME ROOM)
+# 2. HÀM XỬ LÝ TIMER & GAME
+# ==========================================
+async def start_timer(room_id: str, player_role: str):
+    """Đếm ngược 30s, nếu hết giờ thì xử thua"""
+    try:
+        await asyncio.sleep(30) 
+        if room_id in games:
+            game = games[room_id]
+            # Hết giờ -> Người chơi hiện tại thua
+            winner_role = "O" if player_role == "X" else "X"
+            
+            p1 = game["players"]["X"]
+            p2 = game["players"]["O"]
+            winner_name = p1 if winner_role == "X" else p2
+            
+            record_match(p1, p2, winner=winner_name)
+            
+            await manager.broadcast_to_room({
+                "type": "game_over",
+                "winner": winner_role,
+                "reason": "timeout"
+            }, room_id)
+            
+            # Xóa timer
+            game["timer_task"] = None
+            
+    except asyncio.CancelledError:
+        pass # Timer bị hủy -> Người chơi đã đánh kịp
+
+def reset_timer(room_id: str, next_turn: str):
+    """Hủy timer cũ, tạo timer mới"""
+    if room_id in games:
+        # 1. Hủy task cũ
+        old_task = games[room_id].get("timer_task")
+        if old_task: old_task.cancel()
+        
+        # 2. Tạo task mới
+        task = asyncio.create_task(start_timer(room_id, next_turn))
+        games[room_id]["timer_task"] = task
+
+
+# ==========================================
+# 3. QUẢN LÝ BÀN CỜ (WEBSOCKET GAME)
 # ==========================================
 games = {} 
 
@@ -72,12 +109,14 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
     
     if room_id not in games:
         games[room_id] = {
-            "board": [[0 for _ in range(15)] for _ in range(15)],
+            "board": [[0]*15 for _ in range(15)],
             "turn": "X",
-            "players": {"X": None, "O": None}
+            "players": {"X": None, "O": None},
+            "timer_task": None,
+            "history": [] # Lưu lịch sử nước đi để Undo
         }
     
-    game_state = games[room_id]
+    game = games[room_id]
     current_username = None 
 
     try:
@@ -85,125 +124,159 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
             received_data = await websocket.receive_json()
             action = received_data.get("action")
             
-            # --- XỬ LÝ JOIN GAME ---
             if action == "join":
                 current_username = received_data.get("data", {}).get("username", "Guest")
                 role = "Spectator"
                 
-                if game_state["players"]["X"] is None:
-                    game_state["players"]["X"] = current_username
-                    role = "X"
-                elif game_state["players"]["O"] is None:
-                    game_state["players"]["O"] = current_username
-                    role = "O"
-                elif game_state["players"]["X"] == current_username:
-                    role = "X" 
-                elif game_state["players"]["O"] == current_username:
-                    role = "O" 
+                if game["players"]["X"] is None:
+                    game["players"]["X"] = current_username; role = "X"
+                elif game["players"]["O"] is None:
+                    game["players"]["O"] = current_username; role = "O"
+                    # Đủ 2 người -> Bắt đầu timer cho X
+                    reset_timer(room_id, "X")
+                elif game["players"]["X"] == current_username: role = "X"
+                elif game["players"]["O"] == current_username: role = "O"
 
                 await websocket.send_json({"type": "player_assigned", "player": role})
-
-                # Gửi lại bàn cờ hiện tại (SYNC)
-                current_board_data = []
-                for r in range(15):
-                    for c in range(15):
-                        cell_val = game_state["board"][r][c]
-                        if cell_val != 0:
-                            p_char = "X" if cell_val == 1 else "O"
-                            current_board_data.append({"x": c, "y": r, "player": p_char})
                 
-                await websocket.send_json({
-                    "type": "sync_board", 
-                    "data": current_board_data,
-                    "current_turn": game_state["turn"]
-                })
+                # Sync bàn cờ
+                current_board_data = [{"x": c, "y": r, "player": ("X" if cell==1 else "O")} 
+                                      for r, row in enumerate(game["board"]) for c, cell in enumerate(row) if cell!=0]
+                await websocket.send_json({"type": "sync_board", "data": current_board_data, "current_turn": game["turn"]})
 
-            # --- XỬ LÝ ĐÁNH CỜ (MOVE) ---
             elif action == "move":
                 data = received_data.get("data")
                 if data:
                     x, y, player_role = data["x"], data["y"], data["player"]
-                    
-                    if game_state["turn"] == player_role:
+                    if game["turn"] == player_role:
                         player_id = 1 if player_role == "X" else 2
-                        board = game_state["board"]
-
-                        if logic.is_valid_move(board, y, x):
-                            board[y][x] = player_id
+                        
+                        if logic.is_valid_move(game["board"], y, x):
+                            game["board"][y][x] = player_id
                             
-                            if logic.check_win(board, y, x, player_id):
+                            # Lưu lịch sử để Undo
+                            game["history"].append({"x": x, "y": y, "player": player_role})
+
+                            if logic.check_win(game["board"], y, x, player_id):
+                                # Hủy timer
+                                if game.get("timer_task"): game["timer_task"].cancel()
+                                
+                                p1, p2 = game["players"]["X"], game["players"]["O"]
+                                record_match(p1, p2, winner=current_username)
+                                
                                 await manager.broadcast_to_room({
-                                    "type": "game_over",
-                                    "winner": player_role,
+                                    "type": "game_over", "winner": player_role, 
                                     "data": {"x": x, "y": y, "player": player_role}
                                 }, room_id)
                             else:
                                 next_turn = "O" if player_role == "X" else "X"
-                                game_state["turn"] = next_turn
+                                game["turn"] = next_turn
+                                
+                                # Reset timer cho người tiếp theo
+                                reset_timer(room_id, next_turn)
+                                
                                 await manager.broadcast_to_room({
                                     "type": "update_board",
                                     "data": {"x": x, "y": y, "player": player_role, "next_turn": next_turn}
                                 }, room_id)
             
-            # --- XỬ LÝ CHAT ---
             elif action == "chat":
                  await manager.broadcast_to_room({
-                    "type": "chat",
-                    "message": received_data.get("message"),
-                    "sender": received_data.get("sender")
+                    "type": "chat", "message": received_data.get("message"), "sender": received_data.get("sender")
                 }, room_id)
 
-            # --- XỬ LÝ ĐẦU HÀNG ---
             elif action == "resign":
+                if game.get("timer_task"): game["timer_task"].cancel()
+                
                 loser_role = None
-                if game_state["players"]["X"] == current_username: loser_role = "X"
-                elif game_state["players"]["O"] == current_username: loser_role = "O"
+                if game["players"]["X"] == current_username: loser_role = "X"
+                elif game["players"]["O"] == current_username: loser_role = "O"
                 
                 if loser_role:
                     winner_role = "O" if loser_role == "X" else "X"
+                    p1, p2 = game["players"]["X"], game["players"]["O"]
+                    winner_name = p1 if winner_role == "X" else p2
+                    
+                    record_match(p1, p2, winner=winner_name)
+                    
                     await manager.broadcast_to_room({
-                        "type": "game_over",
-                        "winner": winner_role,
-                        "reason": "surrender"
+                        "type": "game_over", "winner": winner_role, "reason": "surrender"
                     }, room_id)
 
-            # --- (MỚI) YÊU CẦU CHƠI LẠI ---
-            elif action == "request_restart":
-                await manager.broadcast_to_room({
-                    "type": "restart_request",
-                    "from": current_username
-                }, room_id)
-
-            # --- (MỚI) XÁC NHẬN CHƠI LẠI (RESET GAME) ---
-            elif action == "confirm_restart":
-                # Reset bàn cờ về 0
-                game_state["board"] = [[0 for _ in range(15)] for _ in range(15)]
-                game_state["turn"] = "X" # Reset lượt về X
+            # --- TÍNH NĂNG MỚI: XIN HÒA ---
+            elif action == "offer_draw":
+                await manager.broadcast_to_room({"type": "draw_offer", "from": current_username}, room_id)
+            
+            elif action == "accept_draw":
+                if game.get("timer_task"): game["timer_task"].cancel()
                 
-                # Gửi lệnh reset cho tất cả client trong phòng
-                await manager.broadcast_to_room({
-                    "type": "reset_game",
-                    "new_turn": "X"
-                }, room_id)
+                p1, p2 = game["players"]["X"], game["players"]["O"]
+                record_match(p1, p2, winner="Draw")
+                
+                await manager.broadcast_to_room({"type": "game_over", "winner": "Draw", "reason": "draw"}, room_id)
+
+            # --- TÍNH NĂNG MỚI: UNDO (ĐI LẠI) ---
+            elif action == "request_undo":
+                await manager.broadcast_to_room({"type": "undo_request", "from": current_username}, room_id)
+                
+            elif action == "accept_undo":
+                if len(game["history"]) > 0:
+                    last_move = game["history"].pop()
+                    lx, ly = last_move["x"], last_move["y"]
+                    game["board"][ly][lx] = 0 # Xóa quân cờ
+                    
+                    # Quay lại lượt của người vừa đi nhầm
+                    prev_turn = last_move["player"]
+                    game["turn"] = prev_turn
+                    
+                    # Reset timer cho người đó đánh lại
+                    reset_timer(room_id, prev_turn)
+                    
+                    await manager.broadcast_to_room({
+                        "type": "undo_update",
+                        "x": lx, "y": ly,
+                        "next_turn": prev_turn
+                    }, room_id)
+
+            elif action == "request_restart":
+                await manager.broadcast_to_room({"type": "restart_request", "from": current_username}, room_id)
+
+            elif action == "confirm_restart":
+                game["board"] = [[0]*15 for _ in range(15)]
+                game["turn"] = "X"
+                game["history"] = []
+                reset_timer(room_id, "X")
+                await manager.broadcast_to_room({"type": "reset_game", "new_turn": "X"}, room_id)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)
+        if game.get("timer_task"): game["timer_task"].cancel()
         
         leaver_role = None
         if current_username:
-            if game_state["players"]["X"] == current_username:
-                leaver_role = "X"
-                game_state["players"]["X"] = None
-            elif game_state["players"]["O"] == current_username:
-                leaver_role = "O"
-                game_state["players"]["O"] = None
+            if game["players"]["X"] == current_username:
+                leaver_role = "X"; game["players"]["X"] = None
+            elif game["players"]["O"] == current_username:
+                leaver_role = "O"; game["players"]["O"] = None
         
         if room_id in games and len(manager.active_rooms.get(room_id, [])) > 0:
             if leaver_role:
-                 await manager.broadcast_to_room({
-                    "type": "opponent_left",
-                    "leaver": leaver_role
-                }, room_id)
+                 await manager.broadcast_to_room({"type": "opponent_left", "leaver": leaver_role}, room_id)
         
         if room_id in games and len(manager.active_rooms.get(room_id, [])) == 0:
             del games[room_id]
+
+# ==========================================
+# 4. CẤU HÌNH API & STATIC FILES
+# ==========================================
+@app.get("/api/history/{username}")
+async def history_api(username: str):
+    return get_user_history(username)
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+frontend_dir = os.path.join(current_dir, "frontend")
+
+if os.path.exists(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+else:
+    print("⚠️ CẢNH BÁO: Không tìm thấy thư mục frontend!")

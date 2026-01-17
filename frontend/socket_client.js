@@ -11,17 +11,19 @@ let roomId = null;
 export function connectSocket(room, onMessageCallback) {
     roomId = room;
     
-    // Địa chỉ WebSocket server
-    // Lưu ý: Nếu chạy trên máy thật (LAN) thì đổi localhost thành IP máy (VD: 192.168.1.x)
-    const wsUrl = `ws://localhost:8000/ws/${roomId}`;
+    // --- TỰ ĐỘNG LẤY ĐỊA CHỈ IP SERVER (QUAN TRỌNG CHO RADMIN) ---
+    // window.location.host trả về "IP:PORT" (VD: 26.123.45.67:8000)
+    // Giúp client tự biết server đang nằm ở đâu.
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const host = window.location.host; 
+    
+    const wsUrl = `${protocol}://${host}/ws/${roomId}`;
     
     console.log(`🔌 Connecting to: ${wsUrl}`);
     socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
         console.log(`✅ WebSocket connected to room: ${roomId}`);
-        
-        // Gửi thông báo tham gia phòng để Server biết và gán X/O
         const username = localStorage.getItem('isLogged') || 'Guest';
         socket.send(JSON.stringify({
             action: "join",
@@ -52,71 +54,59 @@ export function connectSocket(room, onMessageCallback) {
 
 /**
  * Gửi nước đi lên server
- * @param {number} x - Tọa độ cột (0-14)
- * @param {number} y - Tọa độ hàng (0-14)
- * @param {string} player - "X" hoặc "O"
  */
 export function sendMove(x, y, player) {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.warn("⚠️ WebSocket not ready");
-        return;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            action: "move",
+            data: { x, y, player }
+        }));
     }
-
-    // Gửi JSON theo format mà server mong đợi
-    socket.send(JSON.stringify({
-        action: "move",
-        data: { x, y, player }
-    }));
-    
-    console.log(`📤 Sent move: (${x}, ${y}) - Player: ${player}`);
 }
 
 /**
- * Gửi tin nhắn chat (ĐÃ SỬA: Thêm tham số sender)
- * @param {string} message - Nội dung tin nhắn
- * @param {string} sender - Tên người gửi (Username)
+ * Gửi tin nhắn chat
  */
 export function sendChatMessage(message, sender) {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.warn("⚠️ WebSocket not ready");
-        return;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            action: "chat",
+            message: message,
+            sender: sender 
+        }));
     }
-
-    socket.send(JSON.stringify({
-        action: "chat",
-        message: message,
-        sender: sender // <--- QUAN TRỌNG: Gửi kèm tên để server biết ai nhắn
-    }));
 }
 
 /**
  * Gửi lệnh đầu hàng
  */
 export function sendSurrender() {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.warn("⚠️ WebSocket not ready");
-        return;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ action: "resign" }));
     }
-
-    socket.send(JSON.stringify({
-        action: "resign"
-    }));
-    console.log("🏳️ Sent surrender request");
 }
 
 /**
- * Gửi lệnh tùy chỉnh (Dùng cho Restart Game)
+ * Gửi các yêu cầu tính năng nâng cao (Hòa, Undo, Restart)
+ * @param {string} actionType - Loại hành động (offer_draw, accept_draw, request_undo, ...)
+ */
+export function sendRequest(actionType) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ action: actionType }));
+    }
+}
+
+/**
+ * Gửi lệnh tùy chỉnh (Dùng cho các trường hợp đặc biệt khác nếu cần)
  */
 export function sendCustomPacket(data) {
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(data));
-    } else {
-        console.warn("⚠️ Socket not ready for custom packet");
     }
 }
 
 /**
- * Ngắt kết nối WebSocket
+ * Ngắt kết nối
  */
 export function disconnectSocket() {
     if (socket) {
