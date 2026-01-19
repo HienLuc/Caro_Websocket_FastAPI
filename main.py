@@ -217,19 +217,47 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
 
             # --- TÍNH NĂNG MỚI: UNDO (ĐI LẠI) ---
             elif action == "request_undo":
-                await manager.broadcast_to_room({"type": "undo_request", "from": current_username}, room_id)
-                
+                # 1. Kiểm tra xem có nước đi nào trong lịch sử chưa
+                if not game["history"]:
+                    await manager.broadcast_to_room({
+                        "type": "chat", 
+                        "message": "Chưa có nước đi nào để hoàn tác!", 
+                        "sender": "Hệ thống"
+                    }, room_id)
+                    continue
+
+                # 2. Xác định vai trò của người đang XIN đi lại
+                requester_role = None
+                if game["players"]["X"] == current_username: requester_role = "X"
+                elif game["players"]["O"] == current_username: requester_role = "O"
+
+                # 3. Lấy nước đi cuối cùng
+                last_move = game["history"][-1] # Lấy phần tử cuối list
+
+                # 4. KIỂM TRA CHẶT CHẼ:
+                if last_move["player"] == requester_role:
+                    # Gửi yêu cầu cho đối thủ xác nhận
+                    await manager.broadcast_to_room({
+                        "type": "undo_request", 
+                        "from": current_username
+                    }, room_id)
+                else:
+                    error_msg = {
+                        "type": "chat",
+                        "message": "Không thể đi lại! Đối thủ đã đánh rồi.",
+                        "sender": "Hệ thống"
+                    }
+                    await websocket.send_json(error_msg)
+
             elif action == "accept_undo":
                 if len(game["history"]) > 0:
                     last_move = game["history"].pop()
                     lx, ly = last_move["x"], last_move["y"]
-                    game["board"][ly][lx] = 0 # Xóa quân cờ
+                    game["board"][ly][lx] = 0 
                     
-                    # Quay lại lượt của người vừa đi nhầm
                     prev_turn = last_move["player"]
                     game["turn"] = prev_turn
                     
-                    # Reset timer cho người đó đánh lại
                     reset_timer(room_id, prev_turn)
                     
                     await manager.broadcast_to_room({
@@ -237,16 +265,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                         "x": lx, "y": ly,
                         "next_turn": prev_turn
                     }, room_id)
-
-            elif action == "request_restart":
-                await manager.broadcast_to_room({"type": "restart_request", "from": current_username}, room_id)
-
-            elif action == "confirm_restart":
-                game["board"] = [[0]*15 for _ in range(15)]
-                game["turn"] = "X"
-                game["history"] = []
-                reset_timer(room_id, "X")
-                await manager.broadcast_to_room({"type": "reset_game", "new_turn": "X"}, room_id)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)

@@ -12,9 +12,9 @@ Mô hình team: **1 Network - 2 Backend Logic - 2 Frontend**
 |:---:|:---|:---:|:---|:---|:---|
 | 1 | Lục Sỹ Minh Hiền | 084205000722 | **Socket Core** | Quản lý kết nối mạng, Connection Manager, điều phối luồng tin nhắn giữa 2 người chơi. | `main.py`, `connection_manager.py` |
 | 2 | Trần Phát Đạt | 086205002574 | **Game Logic** | Thuật toán check thắng/thua (5 ô), validate nước đi hợp lệ. | `game_logic.py` |
-| 3 | Hà Minh Hiếu  | ... | **System & Data**| API Đăng ký/Đăng nhập, Quản lý file dữ liệu, lưu lịch sử đấu. | `api.py`, `database.py`, `models.py`, `data.json` |
+| 3 | Hà Minh Hiếu  | 015205007954 | **System & Data**| API Đăng ký/Đăng nhập, Quản lý file dữ liệu, lưu lịch sử đấu. | `api.py`, `database.py`, `models.py`, `data.json` |
 | 4 | Sim Lưu Gia Bảo | 087204007397 | **FE Integration**| Xử lý sự kiện JS, kết nối Socket Client, nhận lệnh từ Server để vẽ. | `socket_client.js`, `main.js` |
-| 5 |Lê Hoàng Nhật Bình] | ... | **UI/UX Design** | Thiết kế giao diện HTML/CSS, hiệu ứng bàn cờ, responsive. | `index.html`, `game.html`, `style.css` |
+| 5 |Lê Hoàng Nhật Bình | 086205004972 | **UI/UX Design** | Thiết kế giao diện HTML/CSS, hiệu ứng bàn cờ, responsive. | `index.html`, `game.html`, `style.css` |
 
 ---
 

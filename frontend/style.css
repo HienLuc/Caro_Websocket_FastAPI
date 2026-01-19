@@ -114,14 +114,13 @@ body {
     box-shadow: var(--shadow);
 
     /* --- CĂN GIỮA TUYỆT ĐỐI --- */
-    position: absolute;      /* Đặt vị trí tuyệt đối */
-    top: 50%;                /* Cách mép trên 50% */
-    left: 50%;               /* Cách mép trái 50% */
-    transform: translate(-50%, -50%); /* Dịch ngược lại để chính giữa tâm */
-    
-    /* Đảm bảo responsive */
+    position: absolute;     
+    top: 50%;               
+    left: 50%;              
+    transform: translate(-50%, -50%); 
     max-width: 95%;
-    width: max-content;      /* Ôm sát nội dung */
+    width: max-content;
+    align-items: flex-start;
 }
 
 .caro-grid {
@@ -136,6 +135,7 @@ body {
     width: 32px; height: 32px; background: white;
     display: flex; justify-content: center; align-items: center;
     font-size: 18px; font-weight: 900; cursor: pointer;
+    overflow: hidden;    line-height: 32px;     flex-shrink: 0;
 }
 
 /* --- MÀU QUÂN CỜ --- */
