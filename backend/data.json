@@ -9,6 +9,34 @@
     ],
     "history": [
         {
+            "id": 31,
+            "timestamp": "20/01/2026 21:54",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 30,
+            "timestamp": "20/01/2026 21:52",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 29,
+            "timestamp": "20/01/2026 21:51",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 28,
+            "timestamp": "20/01/2026 21:51",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
             "id": 27,
             "timestamp": "20/01/2026 21:46",
             "player_x": "Minh",

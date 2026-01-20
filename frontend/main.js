@@ -261,7 +261,7 @@ function showGameResult(winner, reason) {
         let resultText = "";
         
         // Tạo text tiêu đề
-        if (reason === "surrender") resultText = isWin ? "ĐỐI THỦ ĐẦU HÀNG" : "BẠN ĐẦU HÀNG";
+        if (reason === "surrender") resultText = isWin ? "ĐỐI THỦ ĐẦU HÀNG, BẠN CHIẾN THẮNG" : "BẠN ĐẦU HÀNG";
         else if (reason === "timeout") resultText = isWin ? "ĐỐI THỦ HẾT GIỜ" : "BẠN HẾT GIỜ";
         else if (reason === "opponent_left") resultText = "ĐỐI THỦ ĐÃ THOÁT";
         else resultText = isWin ? "BẠN CHIẾN THẮNG!" : "BẠN ĐÃ THUA!";
