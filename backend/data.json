@@ -9,6 +9,13 @@
     ],
     "history": [
         {
+            "id": 14,
+            "timestamp": "20/01/2026 09:42",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
             "id": 13,
             "timestamp": "19/01/2026 21:03",
             "player_x": "Minh",

@@ -1,8 +1,6 @@
 import { connectSocket, sendMove, sendChatMessage, disconnectSocket, sendSurrender, sendRequest } from "./socket_client.js";
-
-// ================== CONFIG ==================
 const BOARD_SIZE = 15;
-const TIME_LIMIT = 30; // 30 seconds
+const TIME_LIMIT = 30;
 
 let currentTurn = "X"; 
 let myPlayer = null;
@@ -12,14 +10,14 @@ let board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
 let opponentName = "Đối thủ";
 let timerInterval = null; 
 
-// ================== DOM ELEMENTS ==================
+//DOM ELEMENTS
 const grid = document.getElementById("grid");
 const turnDisplay = document.getElementById("turn");
 const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const timerDisplay = document.getElementById("timer-display");
 
-// ================== INIT & TIMER ==================
+//INIT & TIMER
 function initBoard() {
     grid.innerHTML = "";
     board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
@@ -35,7 +33,7 @@ function initBoard() {
     }
 }
 
-// --- COUNTDOWN TIMER ---
+//COUNTDOWN TIMER
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
@@ -70,7 +68,7 @@ function updateTimerUI(val) {
     }
 }
 
-// ================== GAME LOGIC ==================
+//GAME LOGIC
 function handleCellClick(row, col) {
     if (!gameActive) return;
     if (board[row][col] !== 0) return;
@@ -123,7 +121,7 @@ function updateTurnDisplay(turn) {
     }
 }
 
-// ================== SERVER MESSAGES ==================
+//SERVER MESSAGES
 function handleServerMessage(data) {
     console.log("📩", data);
 
@@ -176,7 +174,7 @@ function handleServerMessage(data) {
             addChatMessage(data.sender, data.message);
             break;
 
-        // --- POPUP TRIGGERS ---
+        //POPUP TRIGGERS
         case "restart_request":
             if (data.from !== myUsername) window.confirmAction('restart_receive'); 
             break;
@@ -195,7 +193,7 @@ function handleServerMessage(data) {
     }
 }
 
-// ================== UI HELPERS ==================
+//UI HELPERS
 function resetGameUI() {
     initBoard();
     gameActive = true;
@@ -254,12 +252,9 @@ function showGameResult(winner, reason) {
     modal.classList.remove("hidden");
 }
 
-// ================== CONFIRM MODAL LOGIC (THIS FIXES THE BLANK MODAL) ==================
-// ... (Các phần trên giữ nguyên)
-
-// ================== XỬ LÝ MODAL CONFIRM (SỬA ĐOẠN NÀY) ==================
+//CONFIRM MODAL LOGIC
+//XỬ LÝ MODAL CONFIRM
 window.confirmAction = function(type) {
-    // Nếu game đã kết thúc thì không bấm được (trừ nút Thoát)
     if(!gameActive && type !== 'exit') return;
 
     const modal = document.getElementById("modal-confirm");
@@ -268,11 +263,9 @@ window.confirmAction = function(type) {
     const desc = document.getElementById("confirm-desc");
     
     window.pendingAction = type;
-    
-    // Reset icon style
     icon.className = "fas confirm-icon"; 
 
-    // --- 1. KHI BẠN CHỦ ĐỘNG BẤM NÚT ---
+    //1. KHI BẠN CHỦ ĐỘNG BẤM NÚT
     if (type === 'surrender') {
         icon.classList.add("fa-flag"); icon.style.color="#ef4444";
         title.innerText = "Đầu Hàng?"; 
@@ -283,7 +276,6 @@ window.confirmAction = function(type) {
         title.innerText = "Rời Phòng?"; 
         desc.innerText = "Bạn sẽ bị xử thua nếu thoát khi đang chơi.";
     } 
-    // --- ĐOẠN NÀY ĐANG BỊ THIẾU HOẶC TRÌNH DUYỆT CHƯA NHẬN ---
     else if (type === 'draw') { 
         icon.classList.add("fa-handshake"); icon.style.color="#f59e0b";
         title.innerText = "Xin Hòa?"; 
@@ -295,7 +287,7 @@ window.confirmAction = function(type) {
         desc.innerText = "Xin đối thủ cho phép đi lại nước vừa rồi?";
     }
     
-    // --- 2. KHI NHẬN YÊU CẦU TỪ ĐỐI THỦ (Server gửi về) ---
+    //2. KHI NHẬN YÊU CẦU TỪ ĐỐI THỦ
     else if (type === 'draw_receive') {
         icon.classList.add("fa-handshake"); icon.style.color="#f59e0b";
         title.innerText = "Cầu Hòa!"; 
@@ -314,8 +306,6 @@ window.confirmAction = function(type) {
 
     modal.classList.remove("hidden");
 };
-
-// ... (Các phần dưới giữ nguyên)
 
 window.closeConfirm = function() {
     document.getElementById("modal-confirm").classList.add("hidden");
@@ -354,7 +344,7 @@ window.handleReplay = function() {
     }
 };
 
-// ================== STARTUP ==================
+//STARTUP
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get("room");

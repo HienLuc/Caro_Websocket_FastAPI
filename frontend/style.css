@@ -1,8 +1,6 @@
-/* ================================
-   1. KHAI BÁO BIẾN & CÀI ĐẶT CHUNG
-   ================================ */
+/*1. KHAI BÁO BIẾN & CÀI ĐẶT CHUNG*/
 :root {
-    --primary: #2ecc71; /* Màu xanh chủ đạo */
+    --primary: #2ecc71;
     --primary-gradient: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
     --bg-light: #f0f8ff;
     --white: #ffffff;
@@ -19,10 +17,7 @@ body {
     color: var(--text);
     min-height: 100vh;
 }
-
-/* ======================
-   2. GIAO DIỆN ĐĂNG NHẬP
-   ====================== */
+/*2. GIAO DIỆN ĐĂNG NHẬP */
 .auth-container {
     display: flex; justify-content: center; align-items: center;
     width: 100%;
@@ -67,9 +62,7 @@ body {
 .auth-footer { margin-top: 25px; font-size: 14px; color: #64748b; }
 .auth-footer a { color: var(--primary); font-weight: 700; text-decoration: none; }
 
-/* ==================================
-   3. THANH ĐIỀU HƯỚNG & BỐ CỤC CHUNG
-   ================================== */
+/*3. THANH ĐIỀU HƯỚNG & BỐ CỤC CHUNG*/
 .navbar {
     display: flex; justify-content: space-between; align-items: center;
     padding: 15px 5%; background: var(--white); box-shadow: var(--shadow);
@@ -88,9 +81,7 @@ body {
     box-shadow: var(--shadow); margin-bottom: 20px;
 }
 
-/* ===============================
-   4. TRANG LỊCH SỬ ĐẤU (HISTORY)
-   ===============================*/
+/*4. TRANG LỊCH SỬ ĐẤU (HISTORY)*/
 .stats-bar {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
     background: #f1f5f9; padding: 15px; border-radius: 12px;
@@ -101,9 +92,7 @@ body {
 .empty-state { text-align: center; padding: 60px 0; color: #94a3b8; }
 .empty-state i { font-size: 45px; color: #6366f1; margin-bottom: 15px; display: block; opacity: 0.5; }
 
-/* =======================================================
-   5. CĂN GIỮA GAME CONTAINER (QUAN TRỌNG)
-   ======================================================= */
+/*5. CĂN GIỮA GAME CONTAINER (QUAN TRỌNG)*/
 .game-container {
     display: flex; 
     gap: 25px; 
@@ -112,8 +101,6 @@ body {
     border-radius: 16px;
     border: 8px solid var(--border-green); 
     box-shadow: var(--shadow);
-
-    /* --- CĂN GIỮA TUYỆT ĐỐI --- */
     position: absolute;     
     top: 50%;               
     left: 50%;              
@@ -138,14 +125,12 @@ body {
     overflow: hidden;    line-height: 32px;     flex-shrink: 0;
 }
 
-/* --- MÀU QUÂN CỜ --- */
-.cell-x { color: #ef4444 !important; } /* X màu Đỏ */
-.cell-o { color: #3b82f6 !important; } /* O màu Xanh */
+/*MÀU QUÂN CỜ*/
+.cell-x { color: #ef4444 !important; } 
+.cell-o { color: #3b82f6 !important; } 
 .cell.taken { background-color: #f8fafc; cursor: not-allowed; }
 
-/* =========================
-   6. POPUP KẾT QUẢ TRẬN ĐẤU
-   ========================= */
+/*6. POPUP KẾT QUẢ TRẬN ĐẤU*/
 .result-card {
     background: white; padding: 40px; border-radius: 20px; width: 600px;
     text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -163,7 +148,7 @@ body {
     border: 2px solid #eee; text-align: left;
 }
 
-/* --- MÀU THẮNG / THUA --- */
+/*MÀU THẮNG / THUA*/
 .res-win { background: #f0fdf4; border-color: #2ecc71; color: #166534; }
 .res-win span:last-child { color: #16a34a; font-weight: 900; }
 
@@ -178,9 +163,7 @@ body {
 
 .res-info { font-size: 13px; font-weight: 600; margin: 5px 0; }
 
-/* ====================================
-   7. MODAL & NÚT BẤM & LOBBY BỔ SUNG
-   ==================================== */
+/*7. MODAL & NÚT BẤM & LOBBY BỔ SUNG*/
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.5); display: flex;
@@ -210,9 +193,7 @@ body {
     padding: 10px; border-bottom: 1px solid #eee;
 }
 
-/* ========================
-   8. MODAL LỊCH SỬ (Sudoku Style)
-   ======================== */
+/*8. MODAL LỊCH SỬ (Sudoku Style)*/
 .history-modal-content {
     background: #f8fafc;
     width: 700px;
@@ -260,19 +241,16 @@ body {
 .tag-win { background: #dcfce7; color: #166534; }
 .tag-lose { background: #fee2e2; color: #991b1b; }
 
-/* =================================
-   9. ĐỒNG HỒ ĐẾM NGƯỢC (TIMER STYLE)
-   ================================= */
+/*9. ĐỒNG HỒ ĐẾM NGƯỢC*/
 .timer-display {
     font-size: 36px;
     font-weight: 900;
     color: #334155;
     text-align: center;
     margin: 5px 0;
-    font-variant-numeric: tabular-nums; /* Giúp số không bị nhảy khi đếm */
+    font-variant-numeric: tabular-nums;
 }
 
-/* Hiệu ứng nhấp nháy đỏ khi còn < 5s */
 .timer-warning {
     color: #ef4444 !important;
     animation: pulse 1s infinite;

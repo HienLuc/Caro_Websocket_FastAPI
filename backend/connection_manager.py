@@ -4,7 +4,6 @@ from typing import Dict, List
 class ConnectionManager:
     def __init__(self):
         #Dùng Dictionary để quản lý theo phòng
-        # Cấu trúc: { "room_id_1": [socket_A, socket_B], "room_id_2": [socket_C] }
         self.active_rooms: Dict[str, List[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, room_id: str):
@@ -29,7 +28,6 @@ class ConnectionManager:
                 self.active_rooms[room_id].remove(websocket)
                 print(f"Server: Một user đã thoát khỏi phòng {room_id}")
             
-            # Nếu phòng trống rỗng (không còn ai) thì xóa luôn key phòng để giải phóng RAM
             if len(self.active_rooms[room_id]) == 0:
                 del self.active_rooms[room_id]
                 print(f"Server: Phòng {room_id} đã đóng cửa do không còn ai.")

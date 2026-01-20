@@ -2,15 +2,14 @@ from typing import List, Tuple
 
 class GameLogic:
     def __init__(self, board_size: int = 15):
-        # Cho phép tùy chỉnh size nếu cần thiết sau này
         self.BOARD_SIZE = board_size
         
         # Các hướng kiểm tra: Ngang, Dọc, Chéo chính (Đông Nam), Chéo phụ (Đông Bắc)
         self.DIRECTIONS = [
-            (0, 1),   # Ngang
-            (1, 0),   # Dọc
-            (1, 1),   # Chéo chính
-            (1, -1)   # Chéo phụ
+            (0, 1),  
+            (1, 0),   
+            (1, 1),   
+            (1, -1)  
         ]
 
     def is_valid_move(self, board: List[List[int]], row: int, col: int) -> bool:
@@ -34,7 +33,6 @@ class GameLogic:
         Kiểm tra bàn cờ đã đầy chưa (Hòa).
         Trả về True nếu không còn ô trống nào (không còn số 0).
         """
-        # Sử dụng generator expression để kiểm tra nhanh hơn và ngắn gọn hơn
         return all(cell != 0 for row_list in board for cell in row_list)
 
     def check_win(self, board: List[List[int]], row: int, col: int, player_id: int) -> bool:
@@ -44,19 +42,19 @@ class GameLogic:
         - Không bị chặn 2 đầu bởi đối thủ.
         """
         # Xác định ID đối thủ
-        opponent_id = 3 - player_id  # Nếu 1 -> 2, Nếu 2 -> 1 (giả sử ID là 1 và 2)
+        opponent_id = 3 - player_id  
 
         for dr, dc in self.DIRECTIONS:
-            count = 1  # Đếm quân vừa đánh
+            count = 1  
             
-            # --- Duyệt chiều dương (+) ---
+            #Duyệt chiều dương
             r_pos, c_pos = row + dr, col + dc
             while 0 <= r_pos < self.BOARD_SIZE and 0 <= c_pos < self.BOARD_SIZE and board[r_pos][c_pos] == player_id:
                 count += 1
                 r_pos += dr
                 c_pos += dc
             
-            # --- Duyệt chiều âm (-) ---
+            #Duyệt chiều âm
             r_neg, c_neg = row - dr, col - dc
             while 0 <= r_neg < self.BOARD_SIZE and 0 <= c_neg < self.BOARD_SIZE and board[r_neg][c_neg] == player_id:
                 count += 1

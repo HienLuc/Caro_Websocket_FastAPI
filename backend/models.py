@@ -11,7 +11,7 @@ class User(BaseModel):
 class GameHistory(BaseModel):
     player1: str
     player2: str
-    winner: str  # Tên người thắng hoặc "Draw"
+    winner: str
     played_at: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 class LoginRequest(BaseModel):

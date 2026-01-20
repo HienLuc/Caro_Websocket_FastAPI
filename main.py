@@ -11,9 +11,7 @@ app = FastAPI()
 manager = ConnectionManager()
 logic = GameLogic()
 
-# ==========================================
 # 1. QUẢN LÝ SẢNH CHỜ (LOBBY)
-# ==========================================
 lobby_connections: Dict[str, WebSocket] = {}
 
 async def broadcast_lobby(message: dict):
@@ -55,10 +53,7 @@ async def lobby_endpoint(websocket: WebSocket, username: str):
         online_users = list(lobby_connections.keys())
         await broadcast_lobby({"type": "online_list", "users": online_users})
 
-
-# ==========================================
 # 2. HÀM XỬ LÝ TIMER & GAME
-# ==========================================
 async def start_timer(room_id: str, player_role: str):
     """Đếm ngược 30s, nếu hết giờ thì xử thua"""
     try:
@@ -80,27 +75,21 @@ async def start_timer(room_id: str, player_role: str):
                 "reason": "timeout"
             }, room_id)
             
-            # Xóa timer
             game["timer_task"] = None
             
     except asyncio.CancelledError:
-        pass # Timer bị hủy -> Người chơi đã đánh kịp
+        pass
 
 def reset_timer(room_id: str, next_turn: str):
     """Hủy timer cũ, tạo timer mới"""
     if room_id in games:
-        # 1. Hủy task cũ
         old_task = games[room_id].get("timer_task")
         if old_task: old_task.cancel()
         
-        # 2. Tạo task mới
         task = asyncio.create_task(start_timer(room_id, next_turn))
         games[room_id]["timer_task"] = task
 
-
-# ==========================================
 # 3. QUẢN LÝ BÀN CỜ (WEBSOCKET GAME)
-# ==========================================
 games = {} 
 
 @app.websocket("/ws/{room_id}")
@@ -113,7 +102,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
             "turn": "X",
             "players": {"X": None, "O": None},
             "timer_task": None,
-            "history": [] # Lưu lịch sử nước đi để Undo
+            "history": []
         }
     
     game = games[room_id]
@@ -132,7 +121,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                     game["players"]["X"] = current_username; role = "X"
                 elif game["players"]["O"] is None:
                     game["players"]["O"] = current_username; role = "O"
-                    # Đủ 2 người -> Bắt đầu timer cho X
                     reset_timer(room_id, "X")
                 elif game["players"]["X"] == current_username: role = "X"
                 elif game["players"]["O"] == current_username: role = "O"
@@ -203,7 +191,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                         "type": "game_over", "winner": winner_role, "reason": "surrender"
                     }, room_id)
 
-            # --- TÍNH NĂNG MỚI: XIN HÒA ---
+            #XIN HÒA
             elif action == "offer_draw":
                 await manager.broadcast_to_room({"type": "draw_offer", "from": current_username}, room_id)
             
@@ -215,7 +203,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                 
                 await manager.broadcast_to_room({"type": "game_over", "winner": "Draw", "reason": "draw"}, room_id)
 
-            # --- TÍNH NĂNG MỚI: UNDO (ĐI LẠI) ---
+            #UNDO (ĐI LẠI)
             elif action == "request_undo":
                 # 1. Kiểm tra xem có nước đi nào trong lịch sử chưa
                 if not game["history"]:
@@ -284,9 +272,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
         if room_id in games and len(manager.active_rooms.get(room_id, [])) == 0:
             del games[room_id]
 
-# ==========================================
 # 4. CẤU HÌNH API & STATIC FILES
-# ==========================================
 @app.get("/api/history/{username}")
 async def history_api(username: str):
     return get_user_history(username)
@@ -297,4 +283,4 @@ frontend_dir = os.path.join(current_dir, "frontend")
 if os.path.exists(frontend_dir):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 else:
-    print("⚠️ CẢNH BÁO: Không tìm thấy thư mục frontend!")
+    print(" CẢNH BÁO: Không tìm thấy thư mục frontend!")

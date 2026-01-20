@@ -1,4 +1,4 @@
-TênnĐồ Án Lập Trình Mạng: Game Caro Online (WebSockets)
+Nhóm 5 - Đồ Án Lập Trình Game Caro Online
 
 Dự án xây dựng trò chơi Caro (Gomoku) thời gian thực, sử dụng kiến trúc **Client-Server** với giao thức **WebSockets** để đảm bảo tốc độ phản hồi tức thì.
 
@@ -37,36 +37,38 @@ Yêu cầu máy đã cài Python.
    cd caro-socket-project
 
 2. Cài đặt các thư viện cần thiết:
+    ```bash
     pip install -r requirements.txt
 
 3. Khởi chạy Server:
-    uvicorn backend.main:app --reload
+    ```bash
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ### Bước 2: Chạy Client (Frontend)
-
-Cách đơn giản: Vào thư mục frontend, click đúp chuột vào file index.html.
-Cách chuẩn (khuyên dùng): Cài Extension "Live Server" trên VS Code -> Chuột phải vào index.html -> Chọn Open with Live Server.
+Truy cập vào link localhost
+```bash
+http://localhost:8000/index.html
 
 ## Cấu Trúc Thư Mục
 
 ```text
 Caro-Websocket-FastAPI/
 │
-├── backend/                # KHỐI SERVER
-│   ├── main.py             # [Socket] Entry point, định nghĩa WebSocket Endpoint
-│   ├── connection_manager.py # [Socket] Quản lý danh sách người chơi online
-│   ├── game_logic.py       # [Logic] Class Game, thuật toán tìm người thắng
-│   ├── api.py              # [System] Các API HTTP (REST) cho Login/Register
-│   ├── database.py         # [System] Hàm đọc/ghi file data.json
-│   ├── models.py           # [System] Pydantic models (User, Room)
-│   └── data.json           # [System] Nơi lưu dữ liệu
+├── backend/                
+│   ├── main.py             
+│   ├── connection_manager.py 
+│   ├── game_logic.py      
+│   ├── api.py             
+│   ├── database.py        
+│   ├── models.py           
+│   └── data.json           
 │
-├── frontend/               # KHỐI CLIENT
-│   ├── index.html          # [UI] Màn hình đăng nhập
-│   ├── game.html           # [UI] Màn hình chơi game
-│   ├── style.css           # [UI] Trang trí giao diện
-│   ├── main.js             # [Integration] Logic sự kiện click, xử lý DOM
-│   └── socket_client.js    # [Integration] Code kết nối với Server
+├── frontend/              
+│   ├── index.html          
+│   ├── game.html           
+│   ├── style.css           
+│   ├── main.js             
+│   └── socket_client.js    
 │
-├── requirements.txt        # Các thư viện cần cài đặt
-└── README.md               # Hướng dẫn chạy dự án
+├── requirements.txt        
+└── README.md               

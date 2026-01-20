@@ -37,4 +37,4 @@ async def get_leaderboard():
     """Lấy danh sách xếp hạng theo số trận thắng"""
     db = load_data()
     sorted_users = sorted(db["users"], key=lambda x: x["win_count"], reverse=True)
-    return sorted_users[:10] # Trả về top 10
+    return sorted_users[:10]

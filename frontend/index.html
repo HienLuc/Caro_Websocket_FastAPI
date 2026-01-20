@@ -187,7 +187,6 @@
 
         // 2. KẾT NỐI WEBSOCKET SẢNH CHỜ
         function connectLobby(username) {
-            // Tự động lấy IP Server (để chạy qua Radmin/LAN)
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
             const host = window.location.host; 
             
@@ -275,7 +274,7 @@
             }, 1000);
         }
 
-        // --- CÁC HÀM XỬ LÝ AUTH ---
+        //CÁC HÀM XỬ LÝ AUTH
         function toggleAuth(showLogin) { 
             const loginForm = document.getElementById('form-login');
             const regForm = document.getElementById('form-reg');
@@ -291,7 +290,6 @@
             const savedP = localStorage.getItem('reg_p');
             
             if (!savedU) {
-                // Logic test nhanh nếu chưa có tài khoản
                 localStorage.setItem('isLogged', u); 
                 currentUser = u;
                 showPage('page-lobby');
@@ -332,7 +330,7 @@
         }
         function closeModal() { document.getElementById('modal-challenge').classList.add('hidden'); }
 
-        // --- LOGIC LỊCH SỬ ĐẤU (MỚI) ---
+        //LOGIC LỊCH SỬ ĐẤU
         async function openHistory() {
             if (!currentUser) return;
             
