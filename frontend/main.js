@@ -1,4 +1,6 @@
 import { connectSocket, sendMove, sendChatMessage, disconnectSocket, sendSurrender, sendRequest } from "./socket_client.js";
+
+// ================== CONFIG ==================
 const BOARD_SIZE = 15;
 const TIME_LIMIT = 30;
 
@@ -10,14 +12,14 @@ let board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
 let opponentName = "Đối thủ";
 let timerInterval = null; 
 
-//DOM ELEMENTS
+// ================== DOM ELEMENTS ==================
 const grid = document.getElementById("grid");
 const turnDisplay = document.getElementById("turn");
 const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const timerDisplay = document.getElementById("timer-display");
 
-//INIT & TIMER
+// ================== INIT & TIMER ==================
 function initBoard() {
     grid.innerHTML = "";
     board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
@@ -33,7 +35,7 @@ function initBoard() {
     }
 }
 
-//COUNTDOWN TIMER
+// --- COUNTDOWN TIMER ---
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
@@ -68,7 +70,7 @@ function updateTimerUI(val) {
     }
 }
 
-//GAME LOGIC
+// ================== GAME LOGIC ==================
 function handleCellClick(row, col) {
     if (!gameActive) return;
     if (board[row][col] !== 0) return;
@@ -121,7 +123,7 @@ function updateTurnDisplay(turn) {
     }
 }
 
-//SERVER MESSAGES
+// ================== SERVER MESSAGES ==================
 function handleServerMessage(data) {
     console.log("📩", data);
 
@@ -193,7 +195,7 @@ function handleServerMessage(data) {
     }
 }
 
-//UI HELPERS
+// ================== UI HELPERS ==================
 function resetGameUI() {
     initBoard();
     gameActive = true;
@@ -230,17 +232,35 @@ window.sendMessage = function() {
 };
 chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") window.sendMessage(); });
 
+//HÀM HIỂN THỊ KẾT QUẢ
 function showGameResult(winner, reason) {
     const modal = document.getElementById("modal-result");
     const winnerNameEl = document.getElementById("winner-name");
     
+    // Lấy các ô hiển thị thông tin người chơi trong bảng kết quả
+    const resBoxes = document.querySelectorAll(".res-box"); 
+    const nameEls = document.querySelectorAll(".res-name"); 
+    const statusEls = document.querySelectorAll(".res-status"); 
+    // 1. ĐIỀN TÊN NGƯỜI CHƠI
+    if(nameEls.length >= 2) {
+        nameEls[0].innerText = myUsername || "BẠN"; 
+        nameEls[1].innerText = opponentName || "ĐỐI THỦ"; 
+    }
+
+    // 2. RESET MÀU SẮC CŨ
+    resBoxes.forEach(box => box.classList.remove("res-win", "res-lose"));
+
+    // 3. XỬ LÝ LOGIC THẮNG/THUA
     if (winner === "Draw") {
         winnerNameEl.innerText = "HAI BÊN HÒA NHAU!";
         winnerNameEl.style.color = "#f59e0b";
+        if(statusEls[0]) statusEls[0].innerText = "Hòa";
+        if(statusEls[1]) statusEls[1].innerText = "Hòa";
     } else {
         const isWin = (winner === myPlayer);
         let resultText = "";
         
+        // Tạo text tiêu đề
         if (reason === "surrender") resultText = isWin ? "ĐỐI THỦ ĐẦU HÀNG" : "BẠN ĐẦU HÀNG";
         else if (reason === "timeout") resultText = isWin ? "ĐỐI THỦ HẾT GIỜ" : "BẠN HẾT GIỜ";
         else if (reason === "opponent_left") resultText = "ĐỐI THỦ ĐÃ THOÁT";
@@ -248,14 +268,30 @@ function showGameResult(winner, reason) {
         
         winnerNameEl.innerText = resultText;
         winnerNameEl.style.color = isWin ? "#2ecc71" : "#ef4444";
+
+        // Cập nhật màu sắc cho 2 box
+        if (isWin) {
+            // Bạn Thắng (Xanh) - Đối thủ Thua (Đỏ)
+            if(resBoxes[0]) resBoxes[0].classList.add("res-win");
+            if(statusEls[0]) statusEls[0].innerText = "CHIẾN THẮNG";
+
+            if(resBoxes[1]) resBoxes[1].classList.add("res-lose");
+            if(statusEls[1]) statusEls[1].innerText = "THẤT BẠI";
+        } else {
+            // Bạn Thua (Đỏ) - Đối thủ Thắng (Xanh)
+            if(resBoxes[0]) resBoxes[0].classList.add("res-lose");
+            if(statusEls[0]) statusEls[0].innerText = "THẤT BẠI";
+
+            if(resBoxes[1]) resBoxes[1].classList.add("res-win");
+            if(statusEls[1]) statusEls[1].innerText = "CHIẾN THẮNG";
+        }
     }
     modal.classList.remove("hidden");
 }
 
 //CONFIRM MODAL LOGIC
-//XỬ LÝ MODAL CONFIRM
 window.confirmAction = function(type) {
-    if(!gameActive && type !== 'exit') return;
+    if(!gameActive && type !== 'exit' && type !== 'restart_receive') return;
 
     const modal = document.getElementById("modal-confirm");
     const icon = document.getElementById("confirm-icon");
@@ -265,11 +301,11 @@ window.confirmAction = function(type) {
     window.pendingAction = type;
     icon.className = "fas confirm-icon"; 
 
-    //1. KHI BẠN CHỦ ĐỘNG BẤM NÚT
+    // 1. KHI BẠN CHỦ ĐỘNG BẤM NÚT
     if (type === 'surrender') {
         icon.classList.add("fa-flag"); icon.style.color="#ef4444";
         title.innerText = "Đầu Hàng?"; 
-        desc.innerText = "Bạn có chắc muốn chịu thua không?";
+        desc.innerText = "Bạn có chắc muốn đầu hàng không?";
     } 
     else if (type === 'exit') {
         icon.classList.add("fa-sign-out-alt"); icon.style.color="#64748b";
@@ -287,7 +323,7 @@ window.confirmAction = function(type) {
         desc.innerText = "Xin đối thủ cho phép đi lại nước vừa rồi?";
     }
     
-    //2. KHI NHẬN YÊU CẦU TỪ ĐỐI THỦ
+    // 2. KHI NHẬN YÊU CẦU TỪ ĐỐI THỦ
     else if (type === 'draw_receive') {
         icon.classList.add("fa-handshake"); icon.style.color="#f59e0b";
         title.innerText = "Cầu Hòa!"; 
@@ -338,13 +374,14 @@ window.executeConfirm = function() {
 };
 
 window.handleReplay = function() {
+    // Logic này dùng cho nút "Chơi lại" trong bảng kết quả
     if (confirm("Gửi yêu cầu chơi ván mới?")) {
         sendRequest('request_restart');
         addChatMessage("Hệ thống", "Đã gửi yêu cầu chơi lại...", "system");
     }
 };
 
-//STARTUP
+// ================== STARTUP ==================
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get("room");
