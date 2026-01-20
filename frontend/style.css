@@ -123,6 +123,7 @@ body {
     display: flex; justify-content: center; align-items: center;
     font-size: 18px; font-weight: 900; cursor: pointer;
     overflow: hidden;    line-height: 32px;     flex-shrink: 0;
+    user-select: none; -webkit-user-select: none;
 }
 
 /*MÀU QUÂN CỜ*/
@@ -260,4 +261,17 @@ body {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
+}
+
+.chat-box {
+    height: 300px;           
+    overflow-y: auto;       
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }

@@ -4,7 +4,7 @@ from backend.connection_manager import ConnectionManager
 from backend.game_logic import GameLogic
 from typing import Dict, List
 import os
-import asyncio # Để chạy timer
+import asyncio 
 from backend.database import record_match, get_user_history
 
 app = FastAPI()
@@ -253,6 +253,30 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                         "x": lx, "y": ly,
                         "next_turn": prev_turn
                     }, room_id)
+            
+            #LOGIC CHƠI LẠI
+            elif action == "request_restart":
+                # A gửi yêu cầu -> Server báo cho B biết
+                await manager.broadcast_to_room({
+                    "type": "restart_request", 
+                    "from": current_username
+                }, room_id)
+
+            elif action == "confirm_restart":
+                # B đồng ý -> Reset toàn bộ bàn cờ và lịch sử
+                game["board"] = [[0]*15 for _ in range(15)]
+                game["turn"] = "X"
+                game["history"] = []
+                
+                # Hủy timer cũ (nếu có)
+                if game.get("timer_task"): 
+                    game["timer_task"].cancel()
+                
+                # Khởi động lại timer cho lượt X
+                reset_timer(room_id, "X")
+
+                # Gửi lệnh Reset cho cả 2 người chơi (để client xóa bàn cờ)
+                await manager.broadcast_to_room({"type": "reset_game"}, room_id)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)

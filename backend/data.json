@@ -9,6 +9,97 @@
     ],
     "history": [
         {
+            "id": 27,
+            "timestamp": "20/01/2026 21:46",
+            "player_x": "Minh",
+            "player_o": "Hien",
+            "winner": "Hien"
+        },
+        {
+            "id": 26,
+            "timestamp": "20/01/2026 21:45",
+            "player_x": "Minh",
+            "player_o": "Hien",
+            "winner": "Minh"
+        },
+        {
+            "id": 25,
+            "timestamp": "20/01/2026 21:45",
+            "player_x": "Minh",
+            "player_o": "Hien",
+            "winner": "Minh"
+        },
+        {
+            "id": 24,
+            "timestamp": "20/01/2026 21:40",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 23,
+            "timestamp": "20/01/2026 21:38",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 22,
+            "timestamp": "20/01/2026 21:37",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Draw"
+        },
+        {
+            "id": 21,
+            "timestamp": "20/01/2026 21:37",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 20,
+            "timestamp": "20/01/2026 21:36",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
+            "id": 19,
+            "timestamp": "20/01/2026 21:29",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 18,
+            "timestamp": "20/01/2026 21:25",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 17,
+            "timestamp": "20/01/2026 21:15",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Hien"
+        },
+        {
+            "id": 16,
+            "timestamp": "20/01/2026 18:03",
+            "player_x": "Minh",
+            "player_o": "Hien",
+            "winner": "Draw"
+        },
+        {
+            "id": 15,
+            "timestamp": "20/01/2026 17:59",
+            "player_x": "Hien",
+            "player_o": "Minh",
+            "winner": "Minh"
+        },
+        {
             "id": 14,
             "timestamp": "20/01/2026 09:42",
             "player_x": "Hien",
