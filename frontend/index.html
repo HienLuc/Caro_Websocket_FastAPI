@@ -315,7 +315,7 @@
                     connectLobby(u);
                 } else {
                     // Backend trả về lỗi (sai pass, không tìm thấy user...)
-                    alert("❌ " + result.message);
+                    alert(" " + result.message);
                 }
             } catch (error) {
                 console.error(error);
@@ -341,10 +341,10 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert("✅ " + result.message);
+                    alert(" " + result.message);
                     toggleAuth(true); // Đăng ký xong thì chuyển về form đăng nhập
                 } else {
-                    alert("❌ " + result.message);
+                    alert(" " + result.message);
                 }
             } catch (error) {
                 console.error(error);
