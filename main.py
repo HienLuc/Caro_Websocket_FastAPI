@@ -6,8 +6,10 @@ from typing import Dict, List
 import os
 import asyncio 
 from backend.database import record_match, get_user_history
+from backend.api import router as system_router
 
 app = FastAPI()
+app.include_router(system_router)
 manager = ConnectionManager()
 logic = GameLogic()
 

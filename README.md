@@ -1,4 +1,4 @@
-Nhóm 5 - Đồ Án Lập Trình Game Caro Online
+Nhóm 5 -Lập Trình Game Caro Online
 
 Dự án xây dựng trò chơi Caro (Gomoku) thời gian thực, sử dụng kiến trúc **Client-Server** với giao thức **WebSockets** để đảm bảo tốc độ phản hồi tức thì.
 

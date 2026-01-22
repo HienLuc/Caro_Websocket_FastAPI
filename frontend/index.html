@@ -273,46 +273,83 @@
                 } 
             }, 1000);
         }
-
-        //CÁC HÀM XỬ LÝ AUTH
+        
+        // 1. Chuyển đổi qua lại giữa form Đăng nhập / Đăng ký
         function toggleAuth(showLogin) { 
             const loginForm = document.getElementById('form-login');
             const regForm = document.getElementById('form-reg');
-            if (showLogin) { loginForm.classList.remove('hidden'); regForm.classList.add('hidden'); } 
-            else { loginForm.classList.add('hidden'); regForm.classList.remove('hidden'); }
+            if (showLogin) { 
+                loginForm.classList.remove('hidden'); 
+                regForm.classList.add('hidden'); 
+            } else { 
+                loginForm.classList.add('hidden'); 
+                regForm.classList.remove('hidden'); 
+            }
+            // Xóa trắng các ô nhập liệu
             document.querySelectorAll('input').forEach(i => i.value = ""); 
         }
 
-        function handleLogin() { 
+        // 2. Xử lý Đăng Nhập (Gọi API /api/system/login)
+        async function handleLogin() { 
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
-            const savedU = localStorage.getItem('reg_u');
-            const savedP = localStorage.getItem('reg_p');
             
-            if (!savedU) {
-                localStorage.setItem('isLogged', u); 
-                currentUser = u;
-                showPage('page-lobby');
-                connectLobby(u);
-                return;
-            }
-            
-            if(u === savedU && p === savedP) { 
-                localStorage.setItem('isLogged', u); 
-                currentUser = u;
-                showPage('page-lobby');
-                connectLobby(u); 
-            } else {
-                alert("Sai tên đăng nhập hoặc mật khẩu");
+            if(!u || !p) return alert("Vui lòng nhập tài khoản và mật khẩu!");
+
+            try {
+                // Gọi vào Backend thực sự
+                const response = await fetch('/api/system/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Đăng nhập thành công -> Lưu tên user -> Vào sảnh
+                    localStorage.setItem('isLogged', u); 
+                    currentUser = u;
+                    
+                    showPage('page-lobby');
+                    connectLobby(u);
+                } else {
+                    // Backend trả về lỗi (sai pass, không tìm thấy user...)
+                    alert("❌ " + result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi kết nối tới Server! (Kiểm tra xem server đã chạy chưa)");
             }
         }
 
-        function handleRegister() { 
+        // 3. Xử lý Đăng Ký (Gọi API /api/system/register)
+        async function handleRegister() { 
             const u = document.getElementById('reg-user').value;
             const p = document.getElementById('reg-pass').value; 
-            if(!u || !p) return alert("Vui lòng điền đầy đủ!"); 
-            localStorage.setItem('reg_u', u); localStorage.setItem('reg_p', p); 
-            alert("Đăng ký thành công!"); toggleAuth(true); 
+            
+            if(!u || !p) return alert("Vui lòng điền đầy đủ thông tin!"); 
+
+            try {
+                // Gửi thông tin đăng ký lên Backend
+                const response = await fetch('/api/system/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert("✅ " + result.message);
+                    toggleAuth(true); // Đăng ký xong thì chuyển về form đăng nhập
+                } else {
+                    alert("❌ " + result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi kết nối tới Server!");
+            }
         }
 
         function handleLogout() { 
